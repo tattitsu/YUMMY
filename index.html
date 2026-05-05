@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUMMY — азиатский маркетплейс</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Nunito:wght@300;400;600;700;800;900&family=Yomogi&display=swap" rel="stylesheet">
+    <style>
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+        :root{--red:#B1474B;--red-dark:#8E3336;--red-glow:rgba(177,71,75,0.3);--cream:#FFF0DD;--cream2:#F5E4C8;--cream3:#EDD5AE;--ink:#1A0E08;--ink2:#3D2B1A;--ink3:#6B4E37;--paper:#FFFBF5;--night:#0A0610;--night2:#150F22;}
+        ::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:var(--cream);}::-webkit-scrollbar-thumb{background:var(--red);border-radius:3px;}
+        body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--ink);overflow-x:hidden;}
+
+        #loader{position:fixed;inset:0;z-index:9999;background:var(--night);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;transition:opacity 0.6s ease, visibility 0.6s ease;}
+        #loader.hide{opacity:0;visibility:hidden;}
+        .loader-witch{width:160px;height:160px;animation:loader-fly 2s ease-in-out infinite;filter:drop-shadow(0 10px 30px rgba(177,71,75,0.5));}
+        @keyframes loader-fly{0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(-20px) rotate(3deg);}}
+        .loader-text{font-family:'Yomogi',cursive;font-size:18px;color:rgba(255,240,221,0.7);letter-spacing:3px;animation:pulse-text 1.5s ease-in-out infinite alternate;}
+        @keyframes pulse-text{0%{opacity:0.4;}100%{opacity:1;}}
+        .loader-dots{display:flex;gap:6px;margin-top:-10px;}
+        .loader-dot{width:6px;height:6px;border-radius:50%;background:var(--red);animation:dot-bounce 1.2s ease-in-out infinite;}
+        .loader-dot:nth-child(2){animation-delay:0.2s;}
+        .loader-dot:nth-child(3){animation-delay:0.4s;}
+        @keyframes dot-bounce{0%,100%{transform:translateY(0);opacity:0.4;}50%{transform:translateY(-8px);opacity:1;}}
+
+        .header{position:fixed;top:0;left:0;width:100%;background:var(--red);box-shadow:0 2px 20px rgba(177,71,75,0.4);z-index:1000;padding:5px 0;transition:padding 0.3s;}
+        .header.scrolled{padding:5px 0;}
+        .container{max-width:1340px;margin:0 auto;padding:0 32px;}
+        .header-inner{display:flex;align-items:center;justify-content:space-between;gap:20px;}
+        .logo-wrap{cursor:pointer;display:flex;align-items:center;}
+        .logo-wrap img{height:68px;width:auto;display:block;}
+        .nav ul{display:flex;list-style:none;gap:28px;}
+        .nav a{color:rgba(255,240,221,0.88);font-weight:700;font-size:13px;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none;cursor:pointer;transition:color 0.2s;position:relative;}
+        .nav a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--cream);transition:width 0.25s;border-radius:1px;}
+        .nav a:hover{color:white;}
+        .nav a:hover::after{width:100%;}
+        .hicons{display:flex;gap:14px;align-items:center;}
+        .hbtn{width:40px;height:40px;border-radius:50%;background:rgba(255,240,221,0.12);border:1px solid rgba(255,240,221,0.25);color:rgba(255,240,221,0.88);font-size:16px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;position:relative;}
+        .hbtn:hover{background:rgba(255,240,221,0.25);color:white;}
+        .cart-badge{position:absolute;top:-4px;right:-4px;background:var(--cream);color:var(--red);font-size:10px;font-weight:900;min-width:17px;height:17px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 3px;}
+        .menu-toggle{display:none;background:none;border:none;color:var(--cream);font-size:22px;cursor:pointer;}
+
+        .main{margin-top:75px;}
+        .page{display:none;animation:fadeUp 0.4s ease;}
+        .active-page{display:block;}
+        @keyframes fadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+
+        .hero{position:relative;min-height:calc(100vh - 75px);overflow:hidden;display:flex;align-items:center;background:var(--night);}
+        .hero-bg{position:absolute;inset:0;z-index:0;background:radial-gradient(ellipse 70% 50% at 50% 100%, rgba(177,71,75,0.35) 0%, transparent 60%),radial-gradient(ellipse 100% 60% at 50% 90%, rgba(237,133,60,0.18) 0%, transparent 55%),radial-gradient(ellipse 80% 40% at 80% 60%, rgba(120,40,80,0.3) 0%, transparent 55%),linear-gradient(180deg, #0A0610 0%, #180C20 25%, #2A1020 45%, #3D1818 65%, #4A1C10 80%, #1A0A08 100%);}
+        .stars{position:absolute;inset:0;z-index:1;pointer-events:none;}
+        .stars::before,.stars::after{content:'';position:absolute;inset:0;}
+        .stars::before{background-image:radial-gradient(1.5px 1.5px at 8% 8%, rgba(255,240,221,0.9),transparent),radial-gradient(1px 1px at 23% 5%, rgba(255,240,221,0.7),transparent),radial-gradient(1px 1px at 41% 12%, rgba(255,240,221,0.8),transparent),radial-gradient(2px 2px at 57% 6%, rgba(255,240,221,1),transparent),radial-gradient(1px 1px at 70% 14%, rgba(255,240,221,0.7),transparent),radial-gradient(1.5px 1.5px at 85% 7%, rgba(255,240,221,0.9),transparent),radial-gradient(1px 1px at 14% 28%, rgba(255,240,221,0.6),transparent),radial-gradient(1px 1px at 32% 22%, rgba(255,240,221,0.5),transparent),radial-gradient(1px 1px at 66% 20%, rgba(255,240,221,0.7),transparent),radial-gradient(1.5px 1.5px at 91% 18%, rgba(255,240,221,0.85),transparent),radial-gradient(1px 1px at 48% 30%, rgba(255,200,150,0.5),transparent),radial-gradient(1px 1px at 78% 32%, rgba(255,240,221,0.55),transparent);animation:star1 4s ease-in-out infinite alternate;}
+        .stars::after{background-image:radial-gradient(1px 1px at 5% 45%, rgba(255,240,221,0.5),transparent),radial-gradient(1px 1px at 19% 38%, rgba(255,220,170,0.6),transparent),radial-gradient(1px 1px at 37% 42%, rgba(255,240,221,0.45),transparent),radial-gradient(1.5px 1.5px at 55% 35%, rgba(255,240,221,0.7),transparent),radial-gradient(1px 1px at 74% 40%, rgba(255,200,150,0.5),transparent),radial-gradient(1px 1px at 96% 42%, rgba(255,240,221,0.6),transparent);animation:star2 6s ease-in-out infinite alternate;}
+        @keyframes star1{0%{opacity:0.5;}100%{opacity:1;}}
+        @keyframes star2{0%{opacity:1;}100%{opacity:0.4;}}
+        .moon{position:absolute;top:10%;right:10%;z-index:2;width:70px;height:70px;border-radius:50%;background:radial-gradient(circle at 38% 38%, #FFF8E0, #F0C860);box-shadow:0 0 0 2px rgba(240,200,96,0.2),0 0 40px rgba(240,200,96,0.25),0 0 100px rgba(200,120,60,0.15);animation:moon-pulse 5s ease-in-out infinite alternate;}
+        @keyframes moon-pulse{0%{box-shadow:0 0 30px rgba(240,200,96,0.2),0 0 80px rgba(200,120,60,0.1);}100%{box-shadow:0 0 50px rgba(240,200,96,0.4),0 0 130px rgba(200,120,60,0.2);}}
+        .horizon-glow{position:absolute;bottom:140px;left:0;right:0;z-index:3;height:120px;background:radial-gradient(ellipse 80% 100% at 50% 100%, rgba(177,71,75,0.25) 0%, rgba(200,100,50,0.12) 40%, transparent 70%);}
+        .city-far,.city-near{position:absolute;bottom:0;left:0;right:0;z-index:4;}
+        .city-far{height:200px;opacity:0.2;}
+        .city-near{height:150px;opacity:0.5;}
+        .win-layer{position:absolute;bottom:0;left:0;right:0;z-index:5;height:200px;pointer-events:none;}
+        .w{position:absolute;border-radius:1px;animation:wink ease-in-out infinite alternate;}
+        @keyframes wink{0%{opacity:0.7;}100%{opacity:0.2;}}
+        .lant{position:absolute;z-index:6;border-radius:50% 50% 40% 40%;filter:blur(0.5px);animation:lant-f ease-in-out infinite;}
+        @keyframes lant-f{0%,100%{transform:translateY(0) rotate(-3deg);}50%{transform:translateY(-28px) rotate(3deg);}}
+        .lant::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);width:1px;height:12px;background:rgba(255,210,120,0.3);}
+        .bk{position:absolute;border-radius:50%;filter:blur(30px);pointer-events:none;animation:bk-a ease-in-out infinite alternate;}
+        @keyframes bk-a{0%{opacity:0.3;transform:scale(1);}100%{opacity:0.08;transform:scale(1.2);}}
+        .hero-inner{position:relative;z-index:10;width:100%;display:flex;align-items:center;justify-content:space-between;gap:20px;padding:50px 0 80px;}
+        .hero-text{flex:1;max-width:500px;animation:ht-in 1s ease both;}
+        @keyframes ht-in{from{opacity:0;transform:translateY(24px);}to{opacity:1;transform:translateY(0);}}
+        .hero-eyebrow{font-family:'Yomogi',cursive;font-size:12px;color:rgba(255,240,221,0.45);letter-spacing:4px;text-transform:uppercase;margin-bottom:16px;display:flex;align-items:center;gap:10px;}
+        .hero-eyebrow::before,.hero-eyebrow::after{content:'';width:24px;height:1px;background:rgba(177,71,75,0.5);}
+        .hero-logo-big{width:320px;margin-bottom:12px;filter:animation:logo-in 1.2s ease 0.1s both;}
+        @keyframes logo-in{from{opacity:0;transform:scale(0.9);}to{opacity:1;transform:scale(1);}}
+        .hero-sub{font-family:'Yomogi',cursive;font-size:14px;color:rgba(255,240,221,0.4);letter-spacing:2px;margin-bottom:26px;}
+        .hero-desc{font-size:15px;color:rgba(255,240,221,0.68);line-height:1.75;margin-bottom:36px;max-width:380px;}
+        .jello-btn{position:relative;width:170px;height:52px;border-radius:45px;border:none;background-color:var(--red);color:white;font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;letter-spacing:1px;text-transform:uppercase;box-shadow:0px 10px 10px rgba(200,100,100,0.35) inset,0px 5px 10px rgba(5,5,5,0.2),0px -10px 10px rgba(140,40,44,0.4) inset;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+        .jello-btn::before{width:70%;height:2px;position:absolute;background-color:rgba(255,255,255,0.5);content:"";filter:blur(1px);top:8px;border-radius:50%;}
+        .jello-btn::after{width:70%;height:2px;position:absolute;background-color:rgba(255,255,255,0.12);content:"";filter:blur(1px);bottom:8px;border-radius:50%;}
+        .jello-btn:hover{animation:jello 0.9s both;}
+        @keyframes jello{0%{transform:scale3d(1,1,1);}30%{transform:scale3d(1.25,0.75,1);}40%{transform:scale3d(0.75,1.25,1);}50%{transform:scale3d(1.15,0.85,1);}65%{transform:scale3d(0.95,1.05,1);}75%{transform:scale3d(1.05,0.95,1);}100%{transform:scale3d(1,1,1);}}
+        .hero-trust{display:flex;gap:12px;margin-top:24px;flex-wrap:wrap;}
+        .trust-pill{display:flex;align-items:center;gap:6px;background:rgba(255,240,221,0.06);border:1px solid rgba(255,240,221,0.1);border-radius:60px;padding:6px 14px;font-size:11px;color:rgba(255,240,221,0.45);font-weight:600;}
+        .trust-pill i{color:var(--red);font-size:9px;}
+        .witch-wrap{flex:0 0 480px;position:relative;height:520px;animation:wi-in 1.2s ease 0.3s both;}
+        @keyframes wi-in{from{opacity:0;transform:translateX(40px);}to{opacity:1;transform:translateX(0);}}
+        .witch-fly{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding-right:20px;animation:fly 7s ease-in-out infinite;filter:drop-shadow(0 20px 50px rgba(177,71,75,0.4)) drop-shadow(0 4px 12px rgba(0,0,0,0.6));}
+        @keyframes fly{0%,100%{transform:translateY(0) rotate(-2deg);}20%{transform:translateY(-18px) rotate(1.5deg);}40%{transform:translateY(-7px) rotate(-1deg);}60%{transform:translateY(-24px) rotate(2.5deg);}80%{transform:translateY(-12px) rotate(0.5deg);}}
+        .witch-fly img{width:440px;max-width:100%;object-fit:contain;}
+        .witch-glow{position:absolute;bottom:55px;left:50%;transform:translateX(-50%);width:240px;height:36px;background:radial-gradient(ellipse,rgba(177,71,75,0.35),transparent 70%);filter:blur(14px);animation:glow-p 7s ease-in-out infinite;}
+        @keyframes glow-p{0%,100%{opacity:0.6;transform:translateX(-50%) scaleX(0.85);}50%{opacity:0.2;transform:translateX(-50%) scaleX(0.65);}}
+        .fly-trail{position:absolute;left:0;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:9px;pointer-events:none;}
+        .trl{height:1px;border-radius:1px;background:linear-gradient(90deg,transparent,rgba(255,240,221,0.12),rgba(255,240,221,0.05));animation:trl-a 2s ease-in-out infinite;}
+        .trl:nth-child(1){width:75px;animation-delay:0s;}
+        .trl:nth-child(2){width:45px;animation-delay:0.2s;}
+        .trl:nth-child(3){width:95px;animation-delay:0.08s;}
+        .trl:nth-child(4){width:35px;animation-delay:0.3s;}
+        .trl:nth-child(5){width:60px;animation-delay:0.15s;}
+        @keyframes trl-a{0%,100%{opacity:0.2;}50%{opacity:0.7;}}
+        .badge-time{position:absolute;bottom:95px;right:10px;background:rgba(10,6,18,0.7);border:1px solid rgba(255,240,221,0.15);backdrop-filter:blur(12px);border-radius:20px;padding:12px 18px;color:var(--cream);font-size:12px;font-weight:600;animation:bdg1 5s ease-in-out infinite;white-space:nowrap;z-index:20;}
+        @keyframes bdg1{0%,100%{transform:translateY(0) rotate(-1.5deg);}50%{transform:translateY(-12px) rotate(1.5deg);}}
+        .badge-time strong{font-family:'Cormorant Garamond',serif;font-size:24px;color:var(--red);display:block;text-align:center;line-height:1.1;}
+
+        .wave-divider{width:100%;overflow:hidden;line-height:0;background:var(--cream);}
+        .wave-divider svg{display:block;width:100%;}
+
+        .promos{background:var(--cream);padding:80px 0 60px;}
+        .sec-head{text-align:center;margin-bottom:50px;}
+        .sec-label{font-family:'Yomogi',cursive;font-size:12px;letter-spacing:4px;text-transform:uppercase;color:var(--red);margin-bottom:8px;}
+        .sec-title{font-family:'Cormorant Garamond',serif;font-size:clamp(32px,4vw,50px);font-weight:700;color:var(--ink);line-height:1.1;}
+        .sec-title em{font-style:italic;color:var(--red);}
+        .sec-line{width:55px;height:3px;background:var(--red);border-radius:2px;margin:14px auto 0;}
+        .promo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+        .promo-card{background:var(--paper);border-radius:28px;overflow:hidden;border:1px solid var(--cream3);transition:all 0.3s;}
+        .promo-card:hover{transform:translateY(-6px);box-shadow:0 18px 40px rgba(177,71,75,0.12);}
+        .promo-img{height:150px;width:100%;display:flex;align-items:center;justify-content:center;font-size:60px;}
+        .promo-img-1{background:linear-gradient(135deg,#F5E4C8,#EDD5AE);}
+        .promo-img-2{background:linear-gradient(135deg,#EBCFA0,#E2C090);}
+        .promo-img-3{background:linear-gradient(135deg,#F5E4C8,#EBCFA0);}
+        .promo-tag{position:absolute;top:10px;left:10px;background:var(--red);color:white;font-size:10px;font-weight:800;letter-spacing:1px;text-transform:uppercase;padding:3px 10px;border-radius:20px;}
+        .promo-card-inner{position:relative;}
+        .promo-body{padding:20px 22px 24px;}
+        .promo-body h4{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:700;margin-bottom:6px;}
+        .promo-body p{font-size:13px;color:var(--ink3);line-height:1.6;}
+        .promo-discount{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;color:var(--red);display:inline-block;margin-top:12px;}
+
+        .how{background:var(--night);padding:80px 0;position:relative;overflow:hidden;}
+        .how::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 80% at 50% 100%,rgba(177,71,75,0.08),transparent);}
+        .how .sec-label{color:rgba(255,240,221,0.45);}
+        .how .sec-title{color:var(--cream);}
+        .how-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px;margin-top:50px;position:relative;}
+        .how-line{position:absolute;top:48px;left:calc(12.5% + 16px);right:calc(12.5% + 16px);height:1px;background:rgba(177,71,75,0.25);}
+        .how-step{text-align:center;padding:32px 18px 26px;background:rgba(255,240,221,0.025);border-radius:22px;border:1px solid rgba(255,240,221,0.06);transition:all 0.3s;position:relative;z-index:1;}
+        .how-step:hover{background:rgba(177,71,75,0.07);border-color:rgba(177,71,75,0.18);transform:translateY(-4px);}
+        .how-num{width:52px;height:52px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;color:white;margin:0 auto 18px;box-shadow:0 0 0 7px rgba(177,71,75,0.15);}
+        .how-icon{font-size:26px;margin-bottom:14px;display:block;filter:saturate(0.7);}
+        .how-step h4{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;color:var(--cream);margin-bottom:8px;}
+        .how-step p{font-size:12px;color:rgba(255,240,221,0.45);line-height:1.6;}
+        .how-note{text-align:center;margin-top:44px;font-family:'Yomogi',cursive;font-size:14px;color:rgba(255,240,221,0.28);letter-spacing:1px;}
+
+        .page-head{padding:48px 0 0;}
+        .page-head .sec-label{text-align:center;}
+        .page-head .sec-title{text-align:center;}
+        .page-head .sec-line{margin:12px auto 0;}
+
+        .catalog-wrap{padding:40px 0 60px;}
+        .filter-bar{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:36px;justify-content:center;}
+        .f-btn{padding:9px 22px;border-radius:60px;border:1.5px solid var(--cream3);background:var(--paper);font-weight:700;font-size:13px;cursor:pointer;transition:all 0.2s;color:var(--ink2);font-family:'Nunito',sans-serif;}
+        .f-btn.active,.f-btn:hover{background:var(--red);color:white;border-color:var(--red);}
+        .foods-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:22px;}
+        .food-card{background:var(--paper);border-radius:22px;overflow:hidden;border:1px solid var(--cream3);transition:all 0.25s;}
+        .food-card:hover{transform:translateY(-5px);box-shadow:0 14px 32px rgba(177,71,75,0.1);border-color:rgba(177,71,75,0.2);}
+        .food-img{width:100%;height:185px;object-fit:cover;background:var(--cream2);display:block;}
+        .food-body{padding:14px 16px 16px;}
+        .food-cat{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;color:var(--red);background:rgba(177,71,75,0.08);border:1px solid rgba(177,71,75,0.15);margin-bottom:6px;letter-spacing:0.5px;}
+        .food-name{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;margin-bottom:2px;}
+        .food-rest{font-size:11px;color:var(--ink3);margin-bottom:10px;}
+        .food-foot{display:flex;align-items:center;justify-content:space-between;}
+        .food-price{font-weight:900;font-size:19px;color:var(--red);}
+        .add-btn{width:34px;height:34px;border-radius:50%;background:var(--red);border:none;color:white;font-size:19px;font-weight:300;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.2s;line-height:1;}
+        .add-btn:hover{background:var(--red-dark);transform:scale(1.1);}
+
+        .rest-wrap{padding:40px 0 60px;}
+        .search-wrap{position:relative;margin-bottom:32px;}
+        .search-wrap i{position:absolute;left:18px;top:50%;transform:translateY(-50%);color:var(--ink3);font-size:15px;}
+        .search-input{width:100%;padding:13px 20px 13px 46px;border:1.5px solid var(--cream3);border-radius:60px;font-family:'Nunito',sans-serif;font-size:14px;background:var(--paper);color:var(--ink);outline:none;transition:border-color 0.2s;}
+        .search-input:focus{border-color:var(--red);}
+        .rest-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:22px;}
+        .rest-card{background:var(--paper);border-radius:22px;overflow:hidden;border:1px solid var(--cream3);cursor:pointer;transition:all 0.25s;}
+        .rest-card:hover{transform:translateY(-5px);box-shadow:0 14px 32px rgba(177,71,75,0.1);}
+        .rest-img{width:100%;height:155px;object-fit:cover;background:var(--cream2);}
+        .rest-body{padding:16px 18px 18px;}
+        .rest-name{font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:700;margin-bottom:4px;}
+        .rest-desc{font-size:12px;color:var(--ink3);margin-top:4px;}
+
+        .about-wrap{padding:40px 0 70px;}
+        .about-hero{background:var(--night);border-radius:36px;padding:52px 52px;margin-bottom:42px;position:relative;overflow:hidden;display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:center;}
+        .about-hero::before{content:'';position:absolute;top:-60px;right:-60px;width:350px;height:350px;border-radius:50%;background:radial-gradient(circle,rgba(177,71,75,0.12),transparent 70%);}
+        .about-hero h2{font-family:'Cormorant Garamond',serif;font-size:44px;font-weight:700;color:var(--cream);line-height:1.1;margin-bottom:16px;}
+        .about-hero h2 em{font-style:italic;color:var(--red);}
+        .about-hero p{font-size:14px;color:rgba(255,240,221,0.58);line-height:1.8;}
+        .about-stats{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+        .astat{background:rgba(255,240,221,0.04);border:1px solid rgba(255,240,221,0.08);border-radius:18px;padding:20px;text-align:center;}
+        .astat-num{font-family:'Cormorant Garamond',serif;font-size:40px;font-weight:700;color:var(--red);}
+        .astat-lbl{font-size:11px;color:rgba(255,240,221,0.35);margin-top:3px;text-transform:uppercase;letter-spacing:1px;}
+        .about-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-bottom:40px;}
+        .about-col{background:var(--paper);border-radius:24px;padding:30px 24px;border:1px solid var(--cream3);transition:all 0.25s;}
+        .about-col:hover{transform:translateY(-4px);box-shadow:0 14px 32px rgba(177,71,75,0.08);}
+        .about-icon{width:48px;height:48px;border-radius:14px;background:linear-gradient(135deg,var(--red),var(--red-dark));display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:18px;box-shadow:0 6px 18px rgba(177,71,75,0.3);}
+        .about-col h3{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;margin-bottom:10px;}
+        .about-col p{font-size:13px;color:var(--ink3);line-height:1.7;}
+        .about-news{margin-bottom:42px;}
+        .news-ttl{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;margin-bottom:24px;}
+        .news-list{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;}
+        .news-card{background:var(--paper);border-radius:22px;padding:24px;border:1px solid var(--cream3);display:flex;gap:18px;transition:border-color 0.2s;}
+        .news-card:hover{border-color:rgba(177,71,75,0.2);}
+        .news-date{flex-shrink:0;text-align:center;padding-top:3px;}
+        .news-day{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;color:var(--red);line-height:1;}
+        .news-month{font-size:10px;color:var(--ink3);text-transform:uppercase;letter-spacing:1px;}
+        .news-body h4{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;margin-bottom:5px;}
+        .news-body p{font-size:12px;color:var(--ink3);line-height:1.6;}
+        .about-guide{background:linear-gradient(135deg,#150F22,var(--night2));border-radius:32px;padding:44px;overflow:hidden;position:relative;margin-bottom:42px;}
+        .about-guide::after{content:'魚';position:absolute;right:30px;bottom:-20px;font-size:160px;opacity:0.04;color:white;pointer-events:none;}
+        .about-guide h3{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;color:var(--cream);margin-bottom:28px;}
+        .guide-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+        .guide-item{display:flex;gap:14px;}
+        .guide-n{flex-shrink:0;width:30px;height:30px;border-radius:50%;background:rgba(177,71,75,0.25);border:1px solid rgba(177,71,75,0.4);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:14px;font-weight:700;color:rgba(255,220,180,0.9);}
+        .guide-item h4{font-size:14px;font-weight:700;color:var(--cream);margin-bottom:4px;}
+        .guide-item p{font-size:12px;color:rgba(255,240,221,0.4);line-height:1.5;}
+        .reviews-section{margin-top:0;}
+        .reviews-title{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;margin-bottom:24px;}
+        .reviews-carousel{position:relative;}
+        .reviews-track-wrap{overflow:hidden;border-radius:24px;}
+        .reviews-track{display:flex;transition:transform 0.45s ease;}
+        .review-slide{min-width:calc(33.333% - 14px);flex-shrink:0;}
+        .review-card{background:var(--paper);border-radius:22px;padding:26px 24px;border:1px solid var(--cream3);margin:0 7px;height:100%;display:flex;flex-direction:column;gap:12px;}
+        .review-stars{color:var(--red);font-size:14px;letter-spacing:2px;}
+        .review-text{font-size:14px;color:var(--ink2);line-height:1.7;flex:1;font-style:italic;}
+        .review-author{display:flex;align-items:center;gap:12px;margin-top:6px;}
+        .review-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red-dark));display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800;color:white;flex-shrink:0;}
+        .review-name{font-weight:700;font-size:14px;}
+        .review-city{font-size:11px;color:var(--ink3);}
+        .rev-nav{display:flex;gap:10px;margin-top:18px;justify-content:flex-end;}
+        .rev-btn{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--cream3);background:var(--paper);cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--ink2);font-size:15px;transition:all 0.2s;}
+        .rev-btn:hover{background:var(--red);border-color:var(--red);color:white;}
+
+        .cart-wrap{padding:40px 0 60px;}
+        .cart-layout{display:grid;grid-template-columns:1fr 340px;gap:28px;align-items:start;}
+        .cart-item{background:var(--paper);border-radius:20px;padding:18px 22px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;border:1px solid var(--cream3);}
+        .cart-item h4{font-family:'Cormorant Garamond',serif;font-size:19px;font-weight:700;}
+        .cart-item p{font-size:11px;color:var(--ink3);}
+        .cart-controls{display:flex;align-items:center;gap:10px;}
+        .qty-btn{width:30px;height:30px;border-radius:50%;background:var(--cream2);border:1px solid var(--cream3);cursor:pointer;font-size:16px;font-weight:300;font-family:'Nunito',sans-serif;display:flex;align-items:center;justify-content:center;color:var(--ink);transition:all 0.2s;}
+        .qty-btn:hover{background:var(--red);color:white;border-color:var(--red);}
+        .qty-n{font-weight:800;font-size:15px;min-width:22px;text-align:center;}
+        .item-price{font-weight:800;font-size:17px;color:var(--red);min-width:65px;text-align:right;}
+        .rm-btn{background:none;border:none;cursor:pointer;color:var(--ink3);font-size:15px;transition:color 0.2s;}
+        .rm-btn:hover{color:var(--red);}
+        .sum-card{background:var(--paper);border-radius:24px;padding:24px;border:1px solid var(--cream3);position:sticky;top:90px;}
+        .sum-card h3{font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;margin-bottom:20px;}
+        .sum-row{display:flex;justify-content:space-between;margin-bottom:12px;font-size:13px;color:var(--ink2);}
+        .sum-row.total{font-size:19px;font-weight:800;border-top:1px solid var(--cream3);padding-top:12px;margin-top:6px;color:var(--ink);}
+        .sum-row.total span:last-child{color:var(--red);}
+        .checkout-jello{width:100%;margin-top:14px;position:relative;height:50px;border-radius:45px;border:none;background-color:var(--red);color:white;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;letter-spacing:1px;text-transform:uppercase;box-shadow:0px 8px 10px rgba(200,100,100,0.3) inset,0px 4px 8px rgba(5,5,5,0.2),0px -8px 10px rgba(140,40,44,0.35) inset;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px;}
+        .checkout-jello::before{width:70%;height:2px;position:absolute;background-color:rgba(255,255,255,0.45);content:"";filter:blur(1px);top:7px;border-radius:50%;}
+        .checkout-jello::after{width:70%;height:2px;position:absolute;background-color:rgba(255,255,255,0.1);content:"";filter:blur(1px);bottom:7px;border-radius:50%;}
+        .checkout-jello:hover{animation:jello 0.9s both;}
+
+        .profile-wrap{padding:50px 0 60px;}
+        .auth-card{max-width:400px;margin:0 auto;background:var(--paper);border-radius:28px;padding:36px;border:1px solid var(--cream3);}
+        .auth-card h2{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;text-align:center;margin-bottom:24px;}
+        .form-group{margin-bottom:16px;}
+        .form-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--ink3);margin-bottom:5px;display:block;}
+        .form-input{width:100%;padding:12px 18px;border:1.5px solid var(--cream3);border-radius:60px;font-family:'Nunito',sans-serif;font-size:14px;background:var(--cream);color:var(--ink);outline:none;transition:border-color 0.2s;}
+        .form-input:focus{border-color:var(--red);}
+        textarea.form-input{border-radius:18px;resize:vertical;}
+        select.form-input{appearance:none;}
+        .btn{display:inline-flex;align-items:center;gap:8px;padding:11px 26px;border-radius:60px;border:none;font-family:'Nunito',sans-serif;font-weight:700;font-size:13px;letter-spacing:0.5px;cursor:pointer;transition:all 0.2s;}
+        .btn-primary{background:var(--red);color:white;}
+        .btn-primary:hover{background:var(--red-dark);transform:translateY(-2px);}
+        .btn-outline{background:transparent;border:1.5px solid var(--red);color:var(--red);}
+        .btn-outline:hover{background:var(--red);color:white;}
+        .btn-ghost{background:var(--cream2);color:var(--ink2);border:1px solid var(--cream3);}
+        .btn-ghost:hover{background:var(--cream3);}
+        .btn-block{width:100%;justify-content:center;margin-bottom:10px;}
+
+        .footer{background:var(--night);color:var(--cream);padding:60px 0 24px;margin-top:0;}
+        .footer-inner{display:grid;grid-template-columns:280px 1fr;gap:50px;margin-bottom:44px;}
+        .footer-logo-img{height:42px;width:auto;display:block;margin-bottom:12px;}
+        .footer-tag{font-family:'Yomogi',cursive;font-size:12px;color:rgba(255,240,221,0.35);line-height:1.6;margin-bottom:22px;max-width:200px;}
+        .socials{display:flex;gap:9px;}
+        .soc-btn{width:36px;height:36px;border-radius:50%;background:rgba(255,240,221,0.06);border:1px solid rgba(255,240,221,0.1);display:flex;align-items:center;justify-content:center;color:rgba(255,240,221,0.45);font-size:14px;cursor:pointer;transition:all 0.2s;text-decoration:none;}
+        .soc-btn:hover{background:var(--red);border-color:var(--red);color:white;transform:translateY(-3px);}
+        .footer-cols{display:grid;grid-template-columns:repeat(3,1fr);gap:36px;}
+        .footer-col h4{font-size:11px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:rgba(255,240,221,0.3);margin-bottom:18px;}
+        .footer-col ul{list-style:none;}
+        .footer-col li{margin-bottom:9px;}
+        .footer-col a{color:rgba(255,240,221,0.55);text-decoration:none;font-size:13px;cursor:pointer;transition:color 0.2s;}
+        .footer-col a:hover{color:var(--red);}
+        .footer-contact{font-size:12px;color:rgba(255,240,221,0.45);margin-bottom:7px;display:flex;align-items:center;gap:7px;}
+        .footer-contact i{color:var(--red);width:13px;}
+        .footer-bottom{border-top:1px solid rgba(255,240,221,0.06);padding-top:22px;display:flex;justify-content:space-between;font-size:11px;color:rgba(255,240,221,0.2);}
+
+        .modal{position:fixed;inset:0;background:rgba(10,6,18,0.75);display:none;align-items:center;justify-content:center;z-index:2000;backdrop-filter:blur(4px);}
+        .modal.active{display:flex;}
+        .modal-card{background:var(--paper);border-radius:32px;max-width:480px;width:90%;padding:32px;animation:mo-in 0.3s ease;}
+        @keyframes mo-in{from{opacity:0;transform:scale(0.95) translateY(10px);}to{opacity:1;transform:scale(1) translateY(0);}}
+        .modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;}
+        .modal-head h3{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;}
+        .modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--ink3);transition:color 0.2s;}
+        .modal-close:hover{color:var(--red);}
+
+        .scroll-top{position:fixed;bottom:22px;right:22px;width:42px;height:42px;border-radius:50%;background:var(--red);color:white;border:none;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:15px;opacity:0;visibility:hidden;transition:all 0.3s;z-index:999;box-shadow:0 6px 18px rgba(177,71,75,0.4);}
+        .scroll-top.visible{opacity:1;visibility:visible;}
+        .scroll-top:hover{transform:translateY(-3px);}
+
+        .empty-state{text-align:center;padding:50px;color:var(--ink3);}
+        .toast{position:fixed;bottom:70px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--cream);padding:11px 22px;border-radius:60px;font-size:13px;font-weight:600;z-index:3000;opacity:0;transition:opacity 0.3s;white-space:nowrap;pointer-events:none;}
+        .toast.show{opacity:1;}
+        .order-card{background:var(--cream);border-radius:18px;padding:16px;margin-bottom:10px;border:1px solid var(--cream3);}
+        .badge{display:inline-flex;align-items:center;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.5px;}
+        .badge-ok{background:rgba(50,180,80,0.1);color:#1a7a3a;}
+        .badge-warn{background:rgba(230,150,0,0.1);color:#956000;}
+        .badge-def{background:var(--cream2);color:var(--ink3);}
+
+        @media(max-width:1200px){.foods-grid{grid-template-columns:repeat(3,1fr);}.how-grid{grid-template-columns:repeat(2,1fr);}.how-line{display:none;}}
+        @media(max-width:960px){
+            .witch-wrap{display:none;}.hero-inner{justify-content:center;}
+            .promo-grid{grid-template-columns:1fr;}.about-cols{grid-template-columns:repeat(2,1fr);}
+            .cart-layout{grid-template-columns:1fr;}.rest-grid{grid-template-columns:repeat(2,1fr);}
+            .menu-toggle{display:block;}
+            .nav{position:fixed;top:0;left:-100%;width:270px;height:100vh;background:var(--red);padding:85px 22px 40px;transition:left 0.3s;z-index:999;box-shadow:4px 0 25px rgba(0,0,0,0.2);}
+            .nav.active{left:0;}.nav ul{flex-direction:column;gap:0;}.nav li{border-bottom:1px solid rgba(255,240,221,0.15);}
+            .nav a{display:block;padding:13px 0;}
+            .footer-inner{grid-template-columns:1fr;gap:36px;}.about-hero{grid-template-columns:1fr;padding:32px 28px;}
+        }
+        @media(max-width:700px){.foods-grid{grid-template-columns:repeat(2,1fr);}.about-cols{grid-template-columns:1fr;}.guide-grid{grid-template-columns:1fr;}.news-list{grid-template-columns:1fr;}.footer-cols{grid-template-columns:1fr 1fr;}.review-slide{min-width:calc(100% - 14px);}}
+        @media(max-width:480px){.foods-grid{grid-template-columns:1fr;}.rest-grid{grid-template-columns:1fr;}.container{padding:0 16px;}}
+    </style>
+</head>
+<body>
+
+<div id="loader">
+    <img class="loader-witch" src="img/loader-witch.png" alt="loading">
+    <div class="loader-text">уже спешим к вам</div>
+    <div class="loader-dots"><div class="loader-dot"></div><div class="loader-dot"></div><div class="loader-dot"></div></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<header class="header" id="header">
+    <div class="container">
+        <div class="header-inner">
+            <div class="logo-wrap" onclick="navigateTo('home')">
+                <img src="img/logo.png" alt="YUMMY">
+            </div>
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <nav class="nav" id="navMenu">
+                <ul>
+                    <li><a onclick="navigateTo('home')">Главная</a></li>
+                    <li><a onclick="navigateTo('catalog')">Блюда</a></li>
+                    <li><a onclick="navigateTo('restaurants')">Рестораны</a></li>
+                    <li><a onclick="navigateTo('about')">О нас</a></li>
+                </ul>
+            </nav>
+            <div class="hicons">
+                <button class="hbtn" onclick="navigateTo('cart')">
+                    <i class="fas fa-shopping-basket"></i>
+                    <span id="cartCountBadge" class="cart-badge">0</span>
+                </button>
+                <button class="hbtn" onclick="navigateTo('profile')"><i class="fas fa-user"></i></button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="main">
+
+<div id="homePage" class="page">
+    <section class="hero">
+        <div class="hero-bg"></div><div class="stars"></div><div class="moon"></div><div class="horizon-glow"></div>
+        <svg class="city-far" viewBox="0 0 1440 200" preserveAspectRatio="none"><path fill="rgba(255,240,221,0.06)" d="M0,200 L0,150 L30,150 L30,100 L45,100 L45,82 L50,76 L55,82 L55,100 L70,100 L70,150 L90,150 L90,115 L110,115 L110,150 L130,150 L130,80 L135,80 L135,58 L140,50 L145,58 L145,80 L150,80 L150,150 L170,150 L170,125 L190,125 L190,150 L220,150 L220,65 L225,65 L225,45 L230,38 L235,45 L235,65 L240,65 L240,150 L260,150 L260,105 L280,105 L280,150 L310,150 L310,88 L315,88 L315,38 L320,28 L325,38 L325,88 L330,88 L330,150 L360,150 L360,125 L380,125 L380,150 L410,150 L410,95 L430,95 L430,150 L460,150 L460,75 L465,75 L465,55 L470,48 L475,55 L475,75 L480,75 L480,150 L510,150 L510,115 L530,115 L530,150 L560,150 L560,95 L580,95 L580,150 L610,150 L610,55 L615,55 L615,25 L620,15 L625,25 L625,55 L630,55 L630,150 L660,150 L660,108 L680,108 L680,150 L710,150 L710,85 L730,85 L730,150 L760,150 L760,72 L765,72 L765,50 L770,42 L775,50 L775,72 L780,72 L780,150 L810,150 L810,115 L830,115 L830,150 L860,150 L860,95 L880,95 L880,150 L910,150 L910,78 L915,78 L915,55 L920,48 L925,55 L925,78 L930,78 L930,150 L960,150 L960,125 L980,125 L980,150 L1010,150 L1010,65 L1015,65 L1015,38 L1020,28 L1025,38 L1025,65 L1030,65 L1030,150 L1060,150 L1060,108 L1080,108 L1080,150 L1110,150 L1110,88 L1130,88 L1130,150 L1160,150 L1160,55 L1165,55 L1165,30 L1170,22 L1175,30 L1175,55 L1180,55 L1180,150 L1210,150 L1210,118 L1230,118 L1230,150 L1260,150 L1260,95 L1280,95 L1280,150 L1310,150 L1310,78 L1330,78 L1330,150 L1360,150 L1360,125 L1380,125 L1380,150 L1440,150 L1440,200Z"/></svg>
+        <svg class="city-near" viewBox="0 0 1440 150" preserveAspectRatio="none"><path fill="rgba(20,8,5,0.85)" d="M0,150 L0,110 L20,110 L20,70 L35,70 L35,110 L50,110 L50,85 L65,85 L65,110 L80,110 L80,55 L85,55 L85,35 L90,28 L95,35 L95,55 L100,55 L100,110 L120,110 L120,88 L140,88 L140,110 L160,110 L160,65 L175,65 L175,110 L200,110 L200,50 L205,50 L205,30 L210,22 L215,30 L215,50 L220,50 L220,110 L245,110 L245,80 L265,80 L265,110 L290,110 L290,60 L295,60 L295,32 L300,22 L305,32 L305,60 L310,60 L310,110 L335,110 L335,85 L355,85 L355,110 L380,110 L380,70 L395,70 L395,110 L420,110 L420,52 L425,52 L425,32 L430,25 L435,32 L435,52 L440,52 L440,110 L465,110 L465,82 L485,82 L485,110 L510,110 L510,68 L530,68 L530,110 L555,110 L555,48 L560,48 L560,22 L565,14 L570,22 L570,48 L575,48 L575,110 L600,110 L600,78 L620,78 L620,110 L645,110 L645,62 L665,62 L665,110 L690,110 L690,50 L695,50 L695,28 L700,20 L705,28 L705,50 L710,50 L710,110 L735,110 L735,84 L755,84 L755,110 L780,110 L780,68 L800,68 L800,110 L825,110 L825,55 L830,55 L830,32 L835,24 L840,32 L840,55 L845,55 L845,110 L870,110 L870,80 L890,80 L890,110 L915,110 L915,65 L935,65 L935,110 L960,110 L960,52 L965,52 L965,28 L970,20 L975,28 L975,52 L980,52 L980,110 L1005,110 L1005,82 L1025,82 L1025,110 L1050,110 L1050,68 L1070,68 L1070,110 L1095,110 L1095,55 L1100,55 L1100,30 L1105,22 L1110,30 L1110,55 L1115,55 L1115,110 L1140,110 L1140,80 L1160,80 L1160,110 L1185,110 L1185,62 L1205,62 L1205,110 L1230,110 L1230,50 L1235,50 L1235,25 L1240,17 L1245,25 L1245,50 L1250,50 L1250,110 L1275,110 L1275,78 L1295,78 L1295,110 L1320,110 L1320,65 L1340,65 L1340,110 L1365,110 L1365,88 L1385,88 L1385,110 L1440,110 L1440,150Z"/></svg>
+        <div class="win-layer"><div class="w" style="width:5px;height:4px;background:rgba(255,220,100,0.7);left:87px;bottom:58px;animation-duration:3.2s;"></div><div class="w" style="width:4px;height:3px;background:rgba(255,200,80,0.5);left:87px;bottom:68px;animation-duration:4s;animation-delay:0.5s;"></div><div class="w" style="width:5px;height:4px;background:rgba(255,220,100,0.65);left:210px;bottom:65px;animation-duration:2.8s;animation-delay:0.3s;"></div><div class="w" style="width:4px;height:4px;background:rgba(255,210,90,0.7);left:300px;bottom:55px;animation-duration:3.5s;animation-delay:1s;"></div><div class="w" style="width:5px;height:4px;background:rgba(255,220,100,0.6);left:430px;bottom:60px;animation-duration:4.2s;animation-delay:0.2s;"></div><div class="w" style="width:4px;height:3px;background:rgba(255,200,80,0.65);left:565px;bottom:50px;animation-duration:3s;animation-delay:0.7s;"></div><div class="w" style="width:5px;height:4px;background:rgba(255,220,100,0.7);left:700px;bottom:62px;animation-duration:3.8s;animation-delay:0.4s;"></div><div class="w" style="width:4px;height:4px;background:rgba(255,210,90,0.55);left:835px;bottom:58px;animation-duration:2.6s;animation-delay:0.9s;"></div><div class="w" style="width:5px;height:3px;background:rgba(255,220,100,0.65);left:970px;bottom:54px;animation-duration:3.3s;animation-delay:0.1s;"></div><div class="w" style="width:4px;height:4px;background:rgba(255,200,80,0.7);left:1105px;bottom:60px;animation-duration:4.5s;animation-delay:0.6s;"></div><div class="w" style="width:5px;height:4px;background:rgba(255,220,100,0.6);left:1240px;bottom:52px;animation-duration:3.1s;animation-delay:0.3s;"></div></div>
+        <div class="lant" style="width:9px;height:13px;background:radial-gradient(circle,rgba(255,170,50,0.9),rgba(255,100,40,0.3));left:6%;bottom:38%;animation-duration:7s;"></div><div class="lant" style="width:7px;height:10px;background:radial-gradient(circle,rgba(255,150,60,0.8),rgba(200,80,30,0.2));left:15%;bottom:48%;animation-duration:9s;animation-delay:1.5s;"></div><div class="lant" style="width:10px;height:14px;background:radial-gradient(circle,rgba(255,180,50,0.9),rgba(255,100,40,0.3));left:82%;bottom:42%;animation-duration:8s;animation-delay:0.8s;"></div><div class="lant" style="width:7px;height:9px;background:radial-gradient(circle,rgba(255,160,50,0.7),rgba(200,80,30,0.2));left:90%;bottom:52%;animation-duration:11s;animation-delay:2s;"></div><div class="lant" style="width:6px;height:8px;background:radial-gradient(circle,rgba(255,170,40,0.75),rgba(200,80,30,0.2));left:48%;bottom:32%;animation-duration:6.5s;animation-delay:3s;"></div>
+        <div class="bk" style="width:180px;height:180px;background:rgba(177,71,75,0.15);left:-5%;top:20%;animation-duration:8s;"></div><div class="bk" style="width:140px;height:140px;background:rgba(150,80,50,0.12);right:-3%;top:35%;animation-duration:10s;animation-delay:2s;"></div><div class="bk" style="width:100px;height:100px;background:rgba(177,71,75,0.1);left:40%;top:5%;animation-duration:7s;animation-delay:1s;"></div>
+        <div class="container">
+            <div class="hero-inner">
+                <div class="hero-text">
+                    <div class="hero-eyebrow">азиатская кухня с доставкой</div>
+                    <img class="hero-logo-big" src="img/logo-big.png" alt="YUMMY">
+                    <div class="hero-sub">маркетплейс лучших ресторанов</div>
+                    <p class="hero-desc">Любимые блюда из лучших азиатских ресторанов города — горячими и вовремя, прямо к вашей двери.</p>
+                    <button class="jello-btn" onclick="navigateTo('catalog')">К заказу <i class="fas fa-arrow-right" style="font-size:11px;"></i></button>
+                    <div class="hero-trust"><div class="trust-pill"><i class="fas fa-circle"></i> 45 мин. доставка</div><div class="trust-pill"><i class="fas fa-circle"></i> Бесплатно от 600 ₽</div><div class="trust-pill"><i class="fas fa-circle"></i> 3 ресторана</div></div>
+                </div>
+                <div class="witch-wrap">
+                    <div class="fly-trail"><div class="trl"></div><div class="trl"></div><div class="trl"></div><div class="trl"></div><div class="trl"></div></div>
+                    <div class="witch-fly"><img src="img/hero-witch.png" alt="Ведьма доставки"></div>
+                    <div class="witch-glow"></div>
+                    <div class="badge-time"><strong>45 мин</strong><span>среднее время доставки</span></div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <div class="wave-divider"><svg viewBox="0 0 1440 55"><path fill="#0A0610" d="M0,38 C360,65 1080,12 1440,38 L1440,0 L0,0 Z"/></svg></div>
+    <section class="promos"><div class="container"><div class="sec-head"><div class="sec-label">специальные предложения</div><h2 class="sec-title">Наши <em>акции</em></h2><div class="sec-line"></div></div><div class="promo-grid"><div class="promo-card"><div class="promo-card-inner"><div class="promo-img promo-img-1" style="font-size:58px;">🎂</div><span class="promo-tag">День рождения</span></div><div class="promo-body"><h4>Подарок в ваш день</h4><p>Отмечаете день рождения? Скидка для именинника — потому что этот день должен быть вкусным.</p><span class="promo-discount">−15%</span></div></div><div class="promo-card"><div class="promo-card-inner"><div class="promo-img promo-img-2" style="font-size:58px;">📖</div><span class="promo-tag">Студентам</span></div><div class="promo-body"><h4>Студенческая скидка</h4><p>Покажи студенческий при оформлении — и получи скидку на весь заказ. Учиться вкусно.</p><span class="promo-discount">−10%</span></div></div><div class="promo-card"><div class="promo-card-inner"><div class="promo-img promo-img-3" style="font-size:58px;">✨</div><span class="promo-tag">Новым</span></div><div class="promo-body"><h4>Первый заказ</h4><p>Добро пожаловать! Первая доставка полностью бесплатно — просто попробуй и убедись сам.</p><span class="promo-discount">0 ₽</span></div></div></div></div></section>
+    <section class="how"><div class="container"><div class="sec-head"><div class="sec-label">всё просто</div><h2 class="sec-title" style="color:var(--cream);">Как <em>оформить</em> заказ</h2><div class="sec-line"></div></div><div class="how-grid"><div class="how-line"></div><div class="how-step"><div class="how-num">1</div><span class="how-icon">🗺️</span><h4>Выберите блюдо</h4><p>Листайте каталог, фильтруйте по категориям</p></div><div class="how-step"><div class="how-num">2</div><span class="how-icon">🧺</span><h4>Добавьте в корзину</h4><p>Нажимайте + и собирайте заказ из разных ресторанов</p></div><div class="how-step"><div class="how-num">3</div><span class="how-icon">📍</span><h4>Укажите адрес</h4><p>Введите адрес доставки и способ оплаты</p></div><div class="how-step"><div class="how-num">4</div><span class="how-icon">🌙</span><h4>Ждите курьера</h4><p>Среднее время доставки — 45 минут</p></div></div></div></section>
+</div>
+
+<div id="catalogPage" class="page"><div class="container"><div class="page-head"><div class="sec-label">меню</div><h2 class="sec-title">Наши <em>блюда</em></h2><div class="sec-line"></div></div><div class="catalog-wrap"><div class="filter-bar" id="categoryFilters"></div><div id="catalogGrid" class="foods-grid"></div></div></div></div>
+
+<div id="restaurantsPage" class="page"><div class="container"><div class="page-head"><div class="sec-label">партнёры</div><h2 class="sec-title">Рестораны</h2><div class="sec-line"></div></div><div class="rest-wrap"><div class="search-wrap"><i class="fas fa-search"></i><input type="text" class="search-input" id="restaurantSearch" placeholder="Найти ресторан..."></div><div id="restaurantsList" class="rest-grid"></div></div></div></div>
+
+<div id="restaurantDetailPage" class="page"><div class="container" style="padding-top:44px;padding-bottom:60px;"><button class="btn btn-ghost" onclick="navigateTo('restaurants')" style="margin-bottom:22px;font-size:13px;"><i class="fas fa-arrow-left"></i> Все рестораны</button><div id="restaurantDetailContent" style="margin-bottom:28px;"></div><div id="restaurantMenuGrid" class="foods-grid"></div></div></div>
+
+<div id="aboutPage" class="page"><div class="container"><div class="page-head"><div class="sec-label">о нас</div><h2 class="sec-title">YUMMY</h2><div class="sec-line"></div></div><div class="about-wrap"><div class="about-hero"><div class="about-hero-text"><h2>Доставка, которой <em>доверяют</em></h2><p>YUMMY — маркетплейс азиатской кухни. Мы собрали лучшие рестораны города и доставляем их вкусы к вашей двери. Быстро, свежо, с заботой.</p></div><div class="about-stats"><div class="astat"><div class="astat-num">3+</div><div class="astat-lbl">Ресторана</div></div><div class="astat"><div class="astat-num">20+</div><div class="astat-lbl">Блюд</div></div><div class="astat"><div class="astat-num">45</div><div class="astat-lbl">Мин. доставка</div></div><div class="astat"><div class="astat-num">0 ₽</div><div class="astat-lbl">Первый заказ</div></div></div></div><div class="about-cols"><div class="about-col"><div class="about-icon">🍜</div><h3>Философия вкуса</h3><p>Азиатская кухня — баланс пяти вкусов. Мы отбираем только партнёров, которые чтут традиции и не жертвуют качеством.</p></div><div class="about-col"><div class="about-icon">🚚</div><h3>Быстрая доставка</h3><p>Среднее время доставки — 45 минут. Еда прибывает горячей и в целости, в удобной упаковке.</p></div><div class="about-col"><div class="about-icon">🌸</div><h3>Свежие продукты</h3><p>Рыба охлаждённая, овощи свежие, соусы готовятся в день заказа. Каждый ресторан проходит контроль качества.</p></div></div><div class="about-news"><h3 class="news-ttl">Новости</h3><div class="news-list"><div class="news-card"><div class="news-date"><div class="news-day">15</div><div class="news-month">Апр</div></div><div class="news-body"><h4>Открылся Sushi Master</h4><p>Теперь в каталоге доступны роллы и суши от Sushi Master — одного из лучших суши-баров города.</p></div></div><div class="news-card"><div class="news-date"><div class="news-day">02</div><div class="news-month">Май</div></div><div class="news-body"><h4>Запуск программы лояльности</h4><p>Скоро в профиле появятся баллы за заказы. Накапливайте и обменивайте на скидки.</p></div></div><div class="news-card"><div class="news-date"><div class="news-day">28</div><div class="news-month">Мар</div></div><div class="news-body"><h4>Бесплатная доставка по центру</h4><p>Расширили зону бесплатной доставки — теперь весь центр города без доплаты.</p></div></div><div class="news-card"><div class="news-date"><div class="news-day">10</div><div class="news-month">Мар</div></div><div class="news-body"><h4>Весеннее меню Ramen Dojo</h4><p>Шеф-повар Ramen Dojo представил сезонное весеннее меню с лёгкими бульонами и сашими.</p></div></div></div></div><div class="about-guide"><h3>Как выбирать блюда</h3><div class="guide-grid"><div class="guide-item"><div class="guide-n">1</div><div><h4>Суши и роллы</h4><p>Для лёгкого ужина. Филадельфия — классика, Дракон — для ярких вкусов.</p></div></div><div class="guide-item"><div class="guide-n">2</div><div><h4>Рамен</h4><p>Согревает и насыщает. Тори — нежный, Кимчи — острый, Унаги — богатый.</p></div></div><div class="guide-item"><div class="guide-n">3</div><div><h4>Поке</h4><p>Здоровый выбор. Лосось или тунец — оба варианта свежи и питательны.</p></div></div><div class="guide-item"><div class="guide-n">4</div><div><h4>Десерты</h4><p>Моти — классика. Тирамису — для поклонников кофейного вкуса.</p></div></div><div class="guide-item"><div class="guide-n">5</div><div><h4>Напитки</h4><p>Зелёный чай успокаивает. Личи мохито освежает. Лимонад — летнее настроение.</p></div></div><div class="guide-item"><div class="guide-n">6</div><div><h4>Комбо-сет</h4><p>Роллы + зелёный чай — лёгкий обед. Рамен + моти — плотный ужин.</p></div></div></div></div><div class="reviews-section"><h3 class="reviews-title">Отзывы гостей</h3><div class="reviews-carousel"><div class="reviews-track-wrap"><div class="reviews-track" id="reviewsTrack"><div class="review-slide"><div class="review-card"><div class="review-stars">★★★★★</div><p class="review-text">«Заказываю уже третий раз подряд. Роллы всегда свежие, рис идеальной консистенции, упаковка аккуратная. Курьер приехал даже раньше обещанного времени!»</p><div class="review-author"><div class="review-avatar">А</div><div><div class="review-name">Анастасия К.</div><div class="review-city">постоянный клиент</div></div></div></div></div><div class="review-slide"><div class="review-card"><div class="review-stars">★★★★★</div><p class="review-text">«Брала поке с лососем и рамен. Порции большие, всё очень вкусно. Особенно понравился бульон — видно, что готовили с душой. Буду заказывать ещё.»</p><div class="review-author"><div class="review-avatar">М</div><div><div class="review-name">Мария Г.</div><div class="review-city">первый заказ</div></div></div></div></div><div class="review-slide"><div class="review-card"><div class="review-stars">★★★★☆</div><p class="review-text">«Очень удобный сайт, приятный дизайн. Нашла новые блюда, которые раньше не пробовала. Рамен с кимчи оказался приятно острым. Рекомендую попробовать!»</p><div class="review-author"><div class="review-avatar">Е</div><div><div class="review-name">Екатерина В.</div><div class="review-city">любитель острого</div></div></div></div></div><div class="review-slide"><div class="review-card"><div class="review-stars">★★★★★</div><p class="review-text">«Моти мороженое — просто шедевр. Дети в восторге, муж тоже оценил. Быстрая доставка, вежливый курьер. Теперь это наш семейный ритуал по пятницам.»</p><div class="review-author"><div class="review-avatar">О</div><div><div class="review-name">Ольга Н.</div><div class="review-city">семейный заказ</div></div></div></div></div><div class="review-slide"><div class="review-card"><div class="review-stars">★★★★★</div><p class="review-text">«Заказывал на рабочий обед для всей команды. Всё приехало горячим, в отдельных контейнерах. Коллеги были впечатлены. Однозначно повторим!»</p><div class="review-author"><div class="review-avatar">Д</div><div><div class="review-name">Дмитрий С.</div><div class="review-city">корпоративный заказ</div></div></div></div></div><div class="review-slide"><div class="review-card"><div class="review-stars">★★★★★</div><p class="review-text">«Дракон — лучший ролл, что я пробовала в городе. Авокадо свежее, угорь сочный. Приятно удивила цена за такое качество. Уже рекомендую подругам.»</p><div class="review-author"><div class="review-avatar">Н</div><div><div class="review-name">Наталья Р.</div><div class="review-city">ценитель суши</div></div></div></div></div></div></div><div class="rev-nav"><button class="rev-btn" id="revPrev"><i class="fas fa-arrow-left"></i></button><button class="rev-btn" id="revNext"><i class="fas fa-arrow-right"></i></button></div></div></div></div></div></div>
+
+<div id="cartPage" class="page"><div class="container"><div class="page-head"><div class="sec-label">оформление</div><h2 class="sec-title">Корзина</h2><div class="sec-line"></div></div><div class="cart-wrap"><div class="cart-layout"><div><div id="cartItemsContainer"></div></div><div><div id="cartSummaryCard" class="sum-card"></div><button class="checkout-jello" id="checkoutBtn">Оформить заказ <i class="fas fa-arrow-right" style="font-size:11px;"></i></button></div></div></div></div></div>
+
+<div id="profilePage" class="page"><div class="container profile-wrap"><div id="authSection"><div class="auth-card"><h2>Вход в аккаунт</h2><div class="form-group"><label class="form-label">Email</label><input type="email" id="loginEmail" class="form-input" placeholder="your@email.com"></div><div class="form-group"><label class="form-label">Пароль</label><input type="password" id="loginPassword" class="form-input" placeholder="••••••••"></div><button id="doLoginBtn" class="btn btn-primary btn-block">Войти</button><button id="doRegisterBtn" class="btn btn-outline btn-block">Зарегистрироваться</button></div></div><div id="profileInfo" style="display:none;"><div style="max-width:580px;margin:0 auto;"><div style="background:var(--paper);border-radius:26px;padding:30px;border:1px solid var(--cream3);margin-bottom:26px;text-align:center;"><div style="width:68px;height:68px;border-radius:50%;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:28px;margin:0 auto 14px;color:white;"><i class="fas fa-user"></i></div><h2 id="profileName" style="font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:700;margin-bottom:3px;"></h2><p id="profileEmail" style="color:var(--ink3);font-size:13px;"></p><button id="logoutBtn" class="btn btn-outline" style="margin-top:16px;font-size:12px;">Выйти</button></div><h3 style="font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:700;margin-bottom:14px;">Мои заказы</h3><div id="orderHistory"></div></div></div></div></div>
+
+</main>
+
+<footer class="footer">
+    <div class="container">
+        <div class="footer-inner">
+            <div><img class="footer-logo-img" src="img/logo.png" alt="YUMMY"><p class="footer-tag">Доставка азиатской кухни из лучших ресторанов города</p><div class="socials"><a href="#" class="soc-btn"><i class="fab fa-vk"></i></a><a href="#" class="soc-btn"><i class="fab fa-telegram"></i></a><a href="#" class="soc-btn"><i class="fab fa-instagram"></i></a></div></div>
+            <div class="footer-cols"><div class="footer-col"><h4>Навигация</h4><ul><li><a onclick="navigateTo('home')">Главная</a></li><li><a onclick="navigateTo('catalog')">Блюда</a></li><li><a onclick="navigateTo('restaurants')">Рестораны</a></li><li><a onclick="navigateTo('about')">О нас</a></li></ul></div><div class="footer-col"><h4>Информация</h4><ul><li><a href="#">Условия доставки</a></li><li><a href="#">Конфиденциальность</a></li><li><a href="#">Акции</a></li><li><a onclick="navigateTo('profile')">Личный кабинет</a></li></ul></div><div class="footer-col"><h4>Контакты</h4><div class="footer-contact"><i class="fas fa-phone"></i> 8 (800) 123-45-67</div><div class="footer-contact"><i class="fas fa-envelope"></i> hello@yummy.asia</div><div class="footer-contact"><i class="fas fa-clock"></i> Ежедн. 10:00–22:00</div></div></div>
+        </div>
+        <div class="footer-bottom"><span>© 2026 YUMMY — доставка азиатской еды</span><span>Все права защищены</span></div>
+    </div>
+</footer>
+
+<button class="scroll-top" id="scrollTop"><i class="fas fa-chevron-up"></i></button>
+
+<div id="orderModal" class="modal">
+    <div class="modal-card">
+        <div class="modal-head"><h3>Оформление заказа</h3><button class="modal-close" onclick="closeModal()">&times;</button></div>
+        <div class="form-group"><label class="form-label">Имя</label><input type="text" id="orderName" class="form-input" placeholder="Ваше имя"></div>
+        <div class="form-group"><label class="form-label">Телефон</label><input type="tel" id="orderPhone" class="form-input" placeholder="+7 (___) ___-__-__"></div>
+        <div class="form-group"><label class="form-label">Адрес доставки</label><input type="text" id="orderAddress" class="form-input" placeholder="Улица, дом, квартира"></div>
+        <div class="form-group"><label class="form-label">Комментарий</label><textarea id="orderComment" class="form-input" rows="2" placeholder="Пожелания к заказу"></textarea></div>
+        <div class="form-group"><label class="form-label">Оплата</label><select id="orderPayment" class="form-input"><option value="card">Картой онлайн</option><option value="cash">Наличными курьеру</option></select></div>
+        <button id="confirmOrderBtn" class="checkout-jello" style="width:100%;margin-top:4px;">Подтвердить заказ</button>
+    </div>
+</div>
+
+<script>
+const FOODS_DATA = [
+    {id:101,name:"Филадельфия",category:"Роллы",price:490,restaurantId:1,restaurantName:"Tokyo Kitchen",image:"img/food-philadelphia.jpg"},
+    {id:102,name:"Тори Рамен",category:"Рамен",price:420,restaurantId:2,restaurantName:"Ramen Dojo",image:"img/food-tori-ramen.jpg"},
+    {id:103,name:"Поке с лососем",category:"Поке",price:530,restaurantId:2,restaurantName:"Ramen Dojo",image:"img/food-poke-salmon.jpg"},
+    {id:104,name:"Сяке Гункан",category:"Суши",price:280,restaurantId:1,restaurantName:"Tokyo Kitchen",image:"img/food-syake-gunkan.jpg"},
+    {id:105,name:"Калифорния",category:"Роллы",price:520,restaurantId:3,restaurantName:"Sushi Master",image:"img/food-california.jpg"},
+    {id:106,name:"Унаги Рамен",category:"Рамен",price:580,restaurantId:2,restaurantName:"Ramen Dojo",image:"img/food-unagi-ramen.jpg"},
+    {id:107,name:"Моти мороженое",category:"Десерты",price:250,restaurantId:1,restaurantName:"Tokyo Kitchen",image:"img/food-mochi.jpg"},
+    {id:108,name:"Зеленый чай",category:"Напитки",price:150,restaurantId:3,restaurantName:"Sushi Master",image:"img/food-green-tea.jpg"},
+    {id:109,name:"Темпура",category:"Суши",price:380,restaurantId:3,restaurantName:"Sushi Master",image:"img/food-tempura.jpg"},
+    {id:110,name:"Чизкейк",category:"Десерты",price:320,restaurantId:2,restaurantName:"Ramen Dojo",image:"img/food-cheesecake.jpg"},
+    {id:111,name:"Кимчи Рамен",category:"Рамен",price:490,restaurantId:2,restaurantName:"Ramen Dojo",image:"img/food-kimchi-ramen.jpg"},
+    {id:112,name:"Поке с тунцом",category:"Поке",price:560,restaurantId:3,restaurantName:"Sushi Master",image:"img/food-poke-tuna.jpg"},
+    {id:113,name:"Манго Моти",category:"Десерты",price:270,restaurantId:1,restaurantName:"Tokyo Kitchen",image:"img/food-mango-mochi.jpg"},
+    {id:114,name:"Клубничный лимонад",category:"Напитки",price:180,restaurantId:2,restaurantName:"Ramen Dojo",image:"img/food-strawberry-lemonade.jpg"},
+    {id:115,name:"Сяке Маки",category:"Суши",price:310,restaurantId:1,restaurantName:"Tokyo Kitchen",image:"img/food-syake-maki.jpg"},
+    {id:116,name:"Дракон",category:"Роллы",price:680,restaurantId:3,restaurantName:"Sushi Master",image:"img/food-dragon.jpg"},
+    {id:117,name:"Карамельный рамен",category:"Рамен",price:450,restaurantId:2,restaurantName:"Ramen Dojo",image:"img/food-caramel-ramen.jpg"},
+    {id:118,name:"Личи мохито",category:"Напитки",price:190,restaurantId:1,restaurantName:"Tokyo Kitchen",image:"img/food-lychee-mojito.jpg"},
+    {id:119,name:"Тайский поке",category:"Поке",price:590,restaurantId:3,restaurantName:"Sushi Master",image:"img/food-thai-poke.jpg"},
+    {id:120,name:"Тирамису",category:"Десерты",price:290,restaurantId:3,restaurantName:"Sushi Master",image:"img/food-tiramisu.jpg"}
+];
+
+const CATS = ["Суши","Роллы","Рамен","Поке","Десерты","Напитки"];
+let cu=null,restaurants=[],foods=[],orders=[],cart=[],users=[];
+
+function saveAll(){
+    localStorage.setItem("yr",JSON.stringify(restaurants));
+    localStorage.setItem("yf",JSON.stringify(foods));
+    localStorage.setItem("yo",JSON.stringify(orders));
+    localStorage.setItem("yu",JSON.stringify(users));
+    localStorage.setItem("yc",JSON.stringify(cart));
+    if(cu) localStorage.setItem("ycu",JSON.stringify(cu));
+    else localStorage.removeItem("ycu");
+}
+
+function loadData(){
+    restaurants=JSON.parse(localStorage.getItem("yr")||JSON.stringify([
+        {id:1,name:"Tokyo Kitchen",description:"Авторские роллы и сашими",image:"img/rest-tokyo-kitchen.jpg"},
+        {id:2,name:"Ramen Dojo",description:"Горячий рамен и поке-боулы",image:"img/rest-ramen-dojo.jpg"},
+        {id:3,name:"Sushi Master",description:"Свежие суши и нигири",image:"img/rest-sushi-master.jpg"}
+    ]));
+    foods=JSON.parse(localStorage.getItem("yf")||JSON.stringify(FOODS_DATA));
+    orders=JSON.parse(localStorage.getItem("yo")||"[]");
+    users=JSON.parse(localStorage.getItem("yu")||JSON.stringify([{email:"admin@yummy.com",password:"admin123",name:"Admin",role:"admin"}]));
+    cart=JSON.parse(localStorage.getItem("yc")||"[]");
+    let s=localStorage.getItem("ycu"); cu=s?JSON.parse(s):null;
+}
+
+function badge(){
+    let t=cart.reduce((s,i)=>s+i.qty,0);
+    document.getElementById("cartCountBadge").innerText=t;
+    saveAll();
+}
+
+function toast(msg){
+    let el=document.getElementById("toast");
+    el.innerText=msg; el.classList.add("show");
+    setTimeout(()=>el.classList.remove("show"),2200);
+}
+
+function foodCardHTML(f){
+    return `<div class="food-card" data-food-id="${f.id}">
+        <img class="food-img" src="${f.image}" alt="${f.name}" loading="lazy" onerror="this.src='https://placehold.co/400x185/EDD5AE/B1474B?text=${encodeURIComponent(f.name)}'">
+        <div class="food-body">
+            <span class="food-cat">${f.category}</span>
+            <div class="food-name">${f.name}</div>
+            <div class="food-rest">${f.restaurantName}</div>
+            <div class="food-foot">
+                <span class="food-price">${f.price} ₽</span>
+                <button class="add-btn" data-id="${f.id}">+</button>
+            </div>
+        </div>
+    </div>`;
+}
+
+function attachFoodEvents(grid){
+    grid.querySelectorAll(".add-btn[data-id]").forEach(btn=>{
+        btn.onclick=function(){
+            let id=+this.dataset.id;
+            let fd=foods.find(f=>f.id===id); if(!fd) return;
+            addToCart(fd.id,fd.name,fd.price,fd.restaurantName);
+        };
+    });
+}
+
+function renderCatalog(sel=null){
+    let g=document.getElementById("catalogGrid"); if(!g) return;
+    let list=sel?foods.filter(f=>f.category===sel):[...foods];
+    if(!list.length){g.innerHTML='<div class="empty-state"><p>Нет блюд в этой категории</p></div>';return;}
+    g.innerHTML=list.map(f=>foodCardHTML(f)).join("");
+    attachFoodEvents(g);
+}
+
+window.addToCart=(id,name,price,rest)=>{
+    let e=cart.find(i=>i.foodId===id);
+    if(e) e.qty++; else cart.push({foodId:id,name,price,restaurantName:rest,qty:1});
+    badge(); renderCartPage(); toast(name+" добавлено в корзину");
+};
+
+function renderCartPage(){
+    let c=document.getElementById("cartItemsContainer"),sc=document.getElementById("cartSummaryCard");
+    if(!c) return;
+    if(!cart.length){
+        c.innerHTML='<div class="empty-state"><p style="font-size:36px;margin-bottom:10px;">🧺</p><p>Корзина пуста</p></div>';
+        if(sc) sc.innerHTML=""; return;
+    }
+    c.innerHTML=cart.map((item,i)=>`
+        <div class="cart-item">
+            <div><h4>${item.name}</h4><p>${item.restaurantName}</p></div>
+            <div class="cart-controls">
+                <button class="qty-btn" onclick="chQty(${i},-1)">−</button>
+                <span class="qty-n">${item.qty}</span>
+                <button class="qty-btn" onclick="chQty(${i},1)">+</button>
+                <span class="item-price">${item.price*item.qty} ₽</span>
+                <button class="rm-btn" onclick="rmItem(${i})"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    `).join("");
+    let sub=cart.reduce((s,i)=>s+i.price*i.qty,0),sv=Math.floor(sub*0.05),tot=sub+sv;
+    if(sc) sc.innerHTML=`<h3>Итого</h3><div class="sum-row"><span>Товары</span><span>${sub} ₽</span></div><div class="sum-row"><span>Доставка</span><span>Бесплатно</span></div><div class="sum-row"><span>Сервисный сбор 5%</span><span>${sv} ₽</span></div><div class="sum-row total"><span>К оплате</span><span>${tot} ₽</span></div>`;
+}
+
+window.chQty=(i,d)=>{let n=cart[i].qty+d;if(n<=0)cart.splice(i,1);else cart[i].qty=n;badge();renderCartPage();};
+window.rmItem=(i)=>{cart.splice(i,1);badge();renderCartPage();};
+
+function closeModal(){document.getElementById("orderModal").classList.remove("active");}
+window.closeModal=closeModal;
+
+function checkout(){
+    if(!cu){toast("Войдите в аккаунт");navigateTo("profile");return;}
+    if(!cart.length) return;
+    document.getElementById("orderModal").classList.add("active");
+    document.getElementById("orderName").value=cu.name||"";
+}
+
+document.getElementById("confirmOrderBtn").addEventListener("click",()=>{
+    let addr=document.getElementById("orderAddress").value;
+    if(!addr){toast("Укажите адрес доставки");return;}
+    let sub=cart.reduce((s,i)=>s+i.price*i.qty,0),tot=sub+Math.floor(sub*0.05);
+    orders.push({id:Date.now(),userId:cu.email,items:[...cart],total:tot,status:"оформлен",date:new Date().toLocaleString(),address:addr});
+    cart=[];badge();saveAll();renderCartPage();closeModal();toast("Заказ успешно оформлен!");navigateTo("profile");
+});
+
+function renderRestaurants(q=""){
+    let f=restaurants.filter(r=>r.name.toLowerCase().includes(q.toLowerCase()));
+    let c=document.getElementById("restaurantsList");
+    if(c) c.innerHTML=f.map(r=>`<div class="rest-card" onclick="openRest(${r.id})"><img class="rest-img" src="${r.image}" alt="${r.name}" onerror="this.src='https://placehold.co/400x155/EDD5AE/B1474B?text=${encodeURIComponent(r.name)}'"><div class="rest-body"><div class="rest-name">${r.name}</div><div class="rest-desc">${r.description}</div></div></div>`).join("");
+}
+
+window.openRest=(id)=>{
+    let r=restaurants.find(r=>r.id===id); if(!r) return;
+    document.getElementById("restaurantDetailContent").innerHTML=`<h2 style="font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;margin-bottom:6px;">${r.name}</h2><p style="color:var(--ink3);">${r.description}</p>`;
+    let menu=foods.filter(f=>f.restaurantId===id);
+    let rmg=document.getElementById("restaurantMenuGrid");
+    rmg.innerHTML=menu.map(f=>foodCardHTML(f)).join("");
+    attachFoodEvents(rmg);
+    navigateTo("restaurantDetail");
+};
+
+function renderOrders(){
+    let uo=orders.filter(o=>o.userId===cu?.email);
+    let c=document.getElementById("orderHistory"); if(!c) return;
+    if(!uo.length){c.innerHTML='<div class="empty-state"><p>Заказов пока нет</p></div>';return;}
+    c.innerHTML=[...uo].reverse().map(o=>`<div class="order-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;"><span style="font-weight:700;font-size:14px;">${o.date}</span><span class="badge badge-${o.status==="доставлен"?"ok":o.status==="оформлен"?"warn":"def"}">${o.status}</span></div><div style="font-size:12px;color:var(--ink3);">Адрес: ${o.address}</div><div style="font-weight:800;color:var(--red);margin-top:6px;font-size:17px;">${o.total} ₽</div></div>`).join("");
+}
+
+window.navigateTo=(p)=>{
+    document.querySelectorAll(".page").forEach(el=>el.classList.remove("active-page"));
+    let el=document.getElementById(p+"Page"); if(!el) return;
+    el.classList.add("active-page");
+    window.scrollTo({top:0,behavior:"smooth"});
+    if(p==="catalog"){renderCatalog();initFilters();}
+    if(p==="restaurants") renderRestaurants();
+    if(p==="cart") renderCartPage();
+    if(p==="profile"){
+        if(cu){document.getElementById("authSection").style.display="none";document.getElementById("profileInfo").style.display="block";
+            document.getElementById("profileName").innerText=cu.name;document.getElementById("profileEmail").innerText=cu.email;renderOrders();}
+        else{document.getElementById("authSection").style.display="block";document.getElementById("profileInfo").style.display="none";}
+    }
+};
+
+document.getElementById("doLoginBtn").addEventListener("click",()=>{
+    let e=document.getElementById("loginEmail").value,p=document.getElementById("loginPassword").value;
+    let u=users.find(u=>u.email===e&&u.password===p);
+    if(u){cu={email:u.email,name:u.name||e.split("@")[0],role:u.role};saveAll();navigateTo("profile");}
+    else toast("Неверный email или пароль");
+});
+
+document.getElementById("doRegisterBtn").addEventListener("click",()=>{
+    let e=document.getElementById("loginEmail").value,p=document.getElementById("loginPassword").value;
+    if(!e||!p){toast("Заполните все поля");return;}
+    if(users.find(u=>u.email===e)){toast("Email уже зарегистрирован");return;}
+    users.push({email:e,password:p,name:e.split("@")[0],role:"client"});
+    cu={email:e,name:e.split("@")[0],role:"client"};saveAll();navigateTo("profile");
+});
+
+document.getElementById("logoutBtn").addEventListener("click",()=>{cu=null;saveAll();navigateTo("home");});
+document.getElementById("checkoutBtn").addEventListener("click",checkout);
+document.getElementById("restaurantSearch").addEventListener("input",e=>renderRestaurants(e.target.value));
+
+function initFilters(){
+    let c=document.getElementById("categoryFilters"); if(!c||c.dataset.i) return; c.dataset.i="1";
+    c.innerHTML=`<button class="f-btn active" data-cat="all">Все</button>`+CATS.map(cat=>`<button class="f-btn" data-cat="${cat}">${cat}</button>`).join("");
+    c.querySelectorAll(".f-btn").forEach(btn=>btn.addEventListener("click",()=>{
+        c.querySelectorAll(".f-btn").forEach(b=>b.classList.remove("active"));btn.classList.add("active");
+        renderCatalog(btn.dataset.cat==="all"?null:btn.dataset.cat);
+    }));
+}
+
+window.addEventListener("scroll",()=>{
+    document.getElementById("header").classList.toggle("scrolled",window.scrollY>40);
+    document.getElementById("scrollTop").classList.toggle("visible",window.scrollY>400);
+});
+document.getElementById("scrollTop").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+
+let mt=document.getElementById("menuToggle"),nm=document.getElementById("navMenu");
+mt.addEventListener("click",()=>nm.classList.toggle("active"));
+document.querySelectorAll(".nav a").forEach(l=>l.addEventListener("click",()=>{if(window.innerWidth<=960)nm.classList.remove("active");}));
+
+let revIdx=0;
+const REV_VISIBLE=()=>window.innerWidth<=700?1:3;
+function updateRev(){
+    let track=document.getElementById("reviewsTrack");
+    if(!track) return;
+    let slides=track.querySelectorAll(".review-slide");
+    let vis=REV_VISIBLE();
+    let maxIdx=Math.max(0,slides.length-vis);
+    if(revIdx<0) revIdx=0;
+    if(revIdx>maxIdx) revIdx=maxIdx;
+    let w=100/vis;
+    slides.forEach(s=>s.style.minWidth=`calc(${w}% - 14px)`);
+    track.style.transform=`translateX(calc(-${revIdx*(w)}% - ${revIdx*14}px))`;
+}
+document.getElementById("revPrev")?.addEventListener("click",()=>{revIdx--;updateRev();});
+document.getElementById("revNext")?.addEventListener("click",()=>{revIdx++;updateRev();});
+window.addEventListener("resize",updateRev);
+
+window.addEventListener("load",()=>{
+    updateRev();
+    setTimeout(()=>{
+        document.getElementById("loader").classList.add("hide");
+    },1800);
+});
+
+loadData(); badge(); renderCatalog(); renderRestaurants(); initFilters(); navigateTo("home");
+</script>
+</body>
+</html>

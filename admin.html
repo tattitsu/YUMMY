@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YUMMY — Админ-панель</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,700&family=Nunito:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* ТЁМНАЯ ТЕМА ДЛЯ ВСЕЙ АДМИН-ПАНЕЛИ */
+        body { 
+            font-family: 'Nunito', sans-serif; 
+            background: #0A0610; 
+            color: #FFF0DD; 
+        }
+        .container { max-width: 1340px; margin: 0 auto; padding: 0 32px; }
+        
+        /* HEADER - тёмная тема */
+        .header { 
+            background: #1A0E08; 
+            padding: 5px 0; 
+            position: fixed; 
+            top: 0; 
+            width: 100%; 
+            z-index: 1000; 
+            border-bottom: 1px solid rgba(255,240,221,0.1);
+        }
+        .header-inner { display: flex; align-items: center; justify-content: space-between; }
+        .logo-wrap img { height: 68px; cursor: pointer; }
+        .nav ul { display: flex; list-style: none; gap: 28px; }
+        .nav a { 
+            color: rgba(255,240,221,0.7); 
+            font-weight: 700; 
+            font-size: 13px; 
+            text-transform: uppercase; 
+            text-decoration: none; 
+            cursor: pointer; 
+        }
+        .nav a:hover { color: #B1474B; }
+        .hicons { display: flex; gap: 14px; align-items: center; }
+        .hbtn { 
+            width: 40px; 
+            height: 40px; 
+            border-radius: 50%; 
+            background: rgba(255,240,221,0.08); 
+            border: 1px solid rgba(255,240,221,0.15); 
+            color: rgba(255,240,221,0.7); 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            cursor: pointer; 
+            font-size: 18px; 
+        }
+        .hbtn:hover { background: #B1474B; color: white; border-color: #B1474B; }
+        .menu-toggle { display: none; background: none; border: none; color: white; font-size: 22px; cursor: pointer; }
+        
+        .main { margin-top: 75px; }
+        .page { display: none; }
+        .active-page { display: block; }
+        
+        /* LOGIN - тёмная тема */
+        .login-container { 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: calc(100vh - 200px); 
+            padding: 40px; 
+        }
+        .auth-card { 
+            max-width: 400px; 
+            width: 100%; 
+            background: #150F22; 
+            border-radius: 28px; 
+            padding: 36px; 
+            border: 1px solid rgba(255,240,221,0.1); 
+        }
+        .auth-card h2 { 
+            font-family: 'Cormorant Garamond', serif; 
+            font-size: 30px; 
+            text-align: center; 
+            margin-bottom: 24px; 
+            color: #FFF0DD;
+        }
+        .form-group { margin-bottom: 16px; }
+        .form-label { 
+            font-size: 11px; 
+            font-weight: 700; 
+            text-transform: uppercase; 
+            color: rgba(255,240,221,0.5); 
+            display: block; 
+            margin-bottom: 5px; 
+        }
+        .form-input, .form-select { 
+            width: 100%; 
+            padding: 12px 18px; 
+            border: 1px solid rgba(255,240,221,0.15); 
+            border-radius: 60px; 
+            font-family: 'Nunito', sans-serif; 
+            font-size: 14px; 
+            background: #0A0610; 
+            color: #FFF0DD; 
+            outline: none; 
+        }
+        .form-input:focus, .form-select:focus { border-color: #B1474B; }
+        .btn { 
+            padding: 11px 26px; 
+            border-radius: 60px; 
+            border: none; 
+            font-weight: 700; 
+            font-size: 13px; 
+            cursor: pointer; 
+            width: 100%; 
+        }
+        .btn-primary { background: #B1474B; color: white; }
+        .btn-primary:hover { background: #8E3336; }
+        
+        /* ADMIN PANEL - тёмная тема */
+        .page-head { padding: 48px 0 0; text-align: center; }
+        .sec-label { 
+            font-family: 'Cormorant Garamond', serif; 
+            font-size: 12px; 
+            letter-spacing: 4px; 
+            color: #B1474B; 
+        }
+        .sec-title { 
+            font-family: 'Cormorant Garamond', serif; 
+            font-size: 40px; 
+            font-weight: 700; 
+            color: #FFF0DD;
+        }
+        .sec-title em { color: #B1474B; font-style: italic; }
+        .sec-line { width: 55px; height: 3px; background: #B1474B; margin: 14px auto 0; }
+        
+        .admin-layout { display: flex; gap: 24px; margin-top: 30px; margin-bottom: 60px; }
+        
+        /* Боковая панель - тёмный фон, увеличенный шрифт */
+        .admin-sidebar { 
+            width: 260px; 
+            flex-shrink: 0; 
+            background: #150F22; 
+            border-radius: 24px; 
+            padding: 20px 16px; 
+            position: sticky; 
+            top: 90px; 
+            border: 1px solid rgba(255,240,221,0.08);
+        }
+        .admin-item { 
+            padding: 14px 18px; 
+            border-radius: 12px; 
+            font-weight: 700; 
+            font-size: 15px; 
+            cursor: pointer; 
+            transition: all 0.2s; 
+            color: rgba(255,240,221,0.6); 
+            margin-bottom: 6px; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+        }
+        .admin-item.active, .admin-item:hover { 
+            background: #B1474B; 
+            color: white; 
+        }
+        .admin-content { 
+            flex: 1; 
+            background: #150F22; 
+            border-radius: 24px; 
+            padding: 24px; 
+            border: 1px solid rgba(255,240,221,0.08); 
+            min-height: 400px; 
+        }
+        
+        /* TABLES в тёмной теме */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { 
+            font-weight: 800; 
+            font-size: 10px; 
+            letter-spacing: 1.5px; 
+            text-transform: uppercase; 
+            color: rgba(255,240,221,0.5); 
+            padding: 9px 10px; 
+            border-bottom: 1px solid rgba(255,240,221,0.1); 
+            text-align: left; 
+        }
+        td { 
+            padding: 10px; 
+            border-bottom: 1px solid rgba(255,240,221,0.05); 
+            color: rgba(255,240,221,0.8);
+        }
+        tr:hover td { background: rgba(255,240,221,0.03); }
+        
+        /* CARDS в тёмной теме */
+        .rest-grid, .foods-grid { 
+            display: grid; 
+            grid-template-columns: repeat(3, 1fr); 
+            gap: 20px; 
+            margin-top: 20px; 
+        }
+        .rest-card, .food-card { 
+            background: #0A0610; 
+            border-radius: 22px; 
+            overflow: hidden; 
+            border: 1px solid rgba(255,240,221,0.1); 
+        }
+        .rest-img, .food-img { 
+            width: 100%; 
+            height: 155px; 
+            object-fit: cover; 
+            background: #1A0E08; 
+        }
+        .rest-body, .food-body { padding: 14px 16px; }
+        .rest-name, .food-name { 
+            font-family: 'Cormorant Garamond', serif; 
+            font-size: 19px; 
+            font-weight: 700; 
+            color: #FFF0DD;
+        }
+        .rest-desc { 
+            font-size: 12px; 
+            color: rgba(255,240,221,0.5); 
+            margin-top: 4px; 
+        }
+        .badge { 
+            display: inline-flex; 
+            padding: 2px 9px; 
+            border-radius: 20px; 
+            font-size: 10px; 
+            font-weight: 700; 
+        }
+        .badge-ok { background: rgba(50,180,80,0.2); color: #4CAF50; }
+        .badge-warn { background: rgba(230,150,0,0.2); color: #FF9800; }
+        .badge-def { background: rgba(255,240,221,0.1); color: rgba(255,240,221,0.7); }
+        
+        /* MODAL - светлая (так удобнее заполнять) */
+        .modal { 
+            position: fixed; 
+            inset: 0; 
+            background: rgba(10,6,18,0.9); 
+            display: none; 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 2000; 
+            backdrop-filter: blur(4px);
+        }
+        .modal.active { display: flex; }
+        .modal-card { 
+            background: #FFFBF5; 
+            border-radius: 32px; 
+            max-width: 500px; 
+            width: 90%; 
+            padding: 32px; 
+            color: #1A0E08;
+        }
+        .modal-card .form-input { 
+            background: #FFF0DD; 
+            color: #1A0E08; 
+            border-color: #EDD5AE;
+        }
+        .modal-card .form-label { color: #6B4E37; }
+        .modal-head { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 22px; 
+        }
+        .modal-head h3 { font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #B1474B; }
+        .modal-close { background: none; border: none; font-size: 22px; cursor: pointer; color: #6B4E37; }
+        .modal-close:hover { color: #B1474B; }
+        
+        .toast { 
+            position: fixed; 
+            bottom: 70px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background: #1A0E08; 
+            color: #FFF0DD; 
+            padding: 11px 22px; 
+            border-radius: 60px; 
+            font-size: 13px; 
+            z-index: 3000; 
+            opacity: 0; 
+            transition: opacity 0.3s; 
+            pointer-events: none; 
+            border: 1px solid rgba(255,240,221,0.1);
+        }
+        .toast.show { opacity: 1; }
+        
+        @media (max-width: 960px) {
+            .admin-layout { flex-direction: column; }
+            .admin-sidebar { position: static; width: 100%; }
+            .admin-sidebar .admin-item { display: inline-block; margin: 0 5px 10px 0; }
+            .rest-grid, .foods-grid { grid-template-columns: repeat(2, 1fr); }
+            .menu-toggle { display: block; }
+            .nav { 
+                position: fixed; 
+                top: 0; 
+                left: -100%; 
+                width: 270px; 
+                height: 100vh; 
+                background: #1A0E08; 
+                padding: 85px 22px 40px; 
+                transition: left 0.3s; 
+                z-index: 999; 
+                border-right: 1px solid rgba(255,240,221,0.1);
+            }
+            .nav.active { left: 0; }
+            .nav ul { flex-direction: column; gap: 0; }
+            .nav li { border-bottom: 1px solid rgba(255,240,221,0.08); }
+            .nav a { display: block; padding: 13px 0; }
+        }
+        @media (max-width: 700px) { .rest-grid, .foods-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="toast" id="toast"></div>
+
+<header class="header">
+    <div class="container">
+        <div class="header-inner">
+            <div class="logo-wrap" onclick="window.location.href='index.html'">
+                <img src="img/logo.png" alt="YUMMY">
+            </div>
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <nav class="nav" id="navMenu">
+                <ul><li><a onclick="showAdminPanel()">Админ-панель</a></li></ul>
+            </nav>
+            <div class="hicons">
+                <!-- Только иконка выхода, без текста -->
+                <button class="hbtn" id="logoutBtn" style="display:none;"><i class="fas fa-sign-out-alt"></i></button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="main">
+    <!-- LOGIN PAGE (тёмная тема) -->
+    <div id="loginPage" class="page active-page">
+        <div class="login-container">
+            <div class="auth-card">
+                <h2>Вход в админ-панель</h2>
+                <div class="form-group"><label class="form-label">Email</label><input type="email" id="adminEmail" class="form-input" placeholder="admin@yummy.com"></div>
+                <div class="form-group"><label class="form-label">Пароль</label><input type="password" id="adminPassword" class="form-input" placeholder="••••••••"></div>
+                <button id="adminLoginBtn" class="btn btn-primary">Войти</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ADMIN PAGE (тёмная тема) -->
+    <div id="adminPage" class="page">
+        <div class="container">
+            <div class="page-head"><div class="sec-label">управление</div><h2 class="sec-title">Панель <em>администратора</em></h2><div class="sec-line"></div></div>
+            <div class="admin-layout">
+                <div class="admin-sidebar">
+                    <div class="admin-item" data-tab="orders">📋 Заказы</div>
+                    <div class="admin-item" data-tab="users">👥 Пользователи</div>
+                    <div class="admin-item" data-tab="restaurants">🏪 Рестораны</div>
+                    <div class="admin-item" data-tab="foods">🍜 Блюда</div>
+                    <div class="admin-item" data-tab="stats">📊 Статистика</div>
+                </div>
+                <div class="admin-content" id="adminContent"></div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- MODAL ДЛЯ ДОБАВЛЕНИЯ РЕСТОРАНА -->
+<div id="addRestModal" class="modal">
+    <div class="modal-card">
+        <div class="modal-head"><h3>➕ Добавить ресторан</h3><button class="modal-close" onclick="closeAddRestModal()">&times;</button></div>
+        <div class="form-group"><label class="form-label">Название ресторана</label><input type="text" id="newRestName" class="form-input" placeholder="Например: Wok Street"></div>
+        <div class="form-group"><label class="form-label">Описание</label><textarea id="newRestDesc" class="form-input" rows="2" placeholder="Краткое описание ресторана"></textarea></div>
+        <div class="form-group"><label class="form-label">URL картинки</label><input type="text" id="newRestImage" class="form-input" placeholder="img/rest-name.jpg или https://..."></div>
+        <button id="saveRestBtn" class="btn btn-primary">Сохранить</button>
+    </div>
+</div>
+
+<!-- MODAL ДЛЯ ДОБАВЛЕНИЯ БЛЮДА -->
+<div id="addFoodModal" class="modal">
+    <div class="modal-card">
+        <div class="modal-head"><h3>➕ Добавить блюдо</h3><button class="modal-close" onclick="closeAddFoodModal()">&times;</button></div>
+        <div class="form-group"><label class="form-label">Название блюда</label><input type="text" id="newFoodName" class="form-input" placeholder="Например: Ролл Филадельфия"></div>
+        <div class="form-group"><label class="form-label">Категория</label><select id="newFoodCat" class="form-input"><option value="Суши">Суши</option><option value="Роллы">Роллы</option><option value="Рамен">Рамен</option><option value="Поке">Поке</option><option value="Десерты">Десерты</option><option value="Напитки">Напитки</option></select></div>
+        <div class="form-group"><label class="form-label">Цена (₽)</label><input type="number" id="newFoodPrice" class="form-input" placeholder="490"></div>
+        <div class="form-group"><label class="form-label">Ресторан</label><select id="newFoodRest" class="form-input"></select></div>
+        <div class="form-group"><label class="form-label">URL картинки</label><input type="text" id="newFoodImage" class="form-input" placeholder="img/food-name.jpg или https://..."></div>
+        <button id="saveFoodBtn" class="btn btn-primary">Сохранить</button>
+    </div>
+</div>
+
+<script>
+    let cu = null, restaurants = [], foods = [], orders = [], users = [];
+
+    function saveAll() {
+        localStorage.setItem("yr", JSON.stringify(restaurants));
+        localStorage.setItem("yf", JSON.stringify(foods));
+        localStorage.setItem("yo", JSON.stringify(orders));
+        localStorage.setItem("yu", JSON.stringify(users));
+        if (cu) localStorage.setItem("ycu", JSON.stringify(cu));
+        else localStorage.removeItem("ycu");
+    }
+
+    function loadData() {
+        restaurants = JSON.parse(localStorage.getItem("yr") || JSON.stringify([
+            {id:1, name:"Tokyo Kitchen", description:"Авторские роллы и сашими", image:"img/rest-tokyo-kitchen.jpg"},
+            {id:2, name:"Ramen Dojo", description:"Горячий рамен и поке-боулы", image:"img/rest-ramen-dojo.jpg"},
+            {id:3, name:"Sushi Master", description:"Свежие суши и нигири", image:"img/rest-sushi-master.jpg"}
+        ]));
+        foods = JSON.parse(localStorage.getItem("yf") || JSON.stringify([
+            {id:101,name:"Филадельфия",category:"Роллы",price:490,restaurantId:1,restaurantName:"Tokyo Kitchen",image:"img/food-philadelphia.jpg"},
+            {id:102,name:"Тори Рамен",category:"Рамен",price:420,restaurantId:2,restaurantName:"Ramen Dojo",image:"img/food-tori-ramen.jpg"},
+            {id:103,name:"Поке с лососем",category:"Поке",price:530,restaurantId:2,restaurantName:"Ramen Dojo",image:"img/food-poke-salmon.jpg"},
+            {id:104,name:"Сяке Гункан",category:"Суши",price:280,restaurantId:1,restaurantName:"Tokyo Kitchen",image:"img/food-syake-gunkan.jpg"},
+            {id:105,name:"Калифорния",category:"Роллы",price:520,restaurantId:3,restaurantName:"Sushi Master",image:"img/food-california.jpg"},
+            {id:106,name:"Унаги Рамен",category:"Рамен",price:580,restaurantId:2,restaurantName:"Ramen Dojo",image:"img/food-unagi-ramen.jpg"},
+            {id:107,name:"Моти мороженое",category:"Десерты",price:250,restaurantId:1,restaurantName:"Tokyo Kitchen",image:"img/food-mochi.jpg"},
+            {id:108,name:"Зеленый чай",category:"Напитки",price:150,restaurantId:3,restaurantName:"Sushi Master",image:"img/food-green-tea.jpg"},
+            {id:109,name:"Темпура",category:"Суши",price:380,restaurantId:3,restaurantName:"Sushi Master",image:"img/food-tempura.jpg"},
+            {id:110,name:"Чизкейк",category:"Десерты",price:320,restaurantId:2,restaurantName:"Ramen Dojo",image:"img/food-cheesecake.jpg"},
+            {id:111,name:"Кимчи Рамен",category:"Рамен",price:490,restaurantId:2,restaurantName:"Ramen Dojo",image:"img/food-kimchi-ramen.jpg"},
+            {id:112,name:"Поке с тунцом",category:"Поке",price:560,restaurantId:3,restaurantName:"Sushi Master",image:"img/food-poke-tuna.jpg"},
+            {id:113,name:"Манго Моти",category:"Десерты",price:270,restaurantId:1,restaurantName:"Tokyo Kitchen",image:"img/food-mango-mochi.jpg"},
+            {id:114,name:"Клубничный лимонад",category:"Напитки",price:180,restaurantId:2,restaurantName:"Ramen Dojo",image:"img/food-strawberry-lemonade.jpg"},
+            {id:115,name:"Сяке Маки",category:"Суши",price:310,restaurantId:1,restaurantName:"Tokyo Kitchen",image:"img/food-syake-maki.jpg"},
+            {id:116,name:"Дракон",category:"Роллы",price:680,restaurantId:3,restaurantName:"Sushi Master",image:"img/food-dragon.jpg"},
+            {id:117,name:"Карамельный рамен",category:"Рамен",price:450,restaurantId:2,restaurantName:"Ramen Dojo",image:"img/food-caramel-ramen.jpg"},
+            {id:118,name:"Личи мохито",category:"Напитки",price:190,restaurantId:1,restaurantName:"Tokyo Kitchen",image:"img/food-lychee-mojito.jpg"},
+            {id:119,name:"Тайский поке",category:"Поке",price:590,restaurantId:3,restaurantName:"Sushi Master",image:"img/food-thai-poke.jpg"},
+            {id:120,name:"Тирамису",category:"Десерты",price:290,restaurantId:3,restaurantName:"Sushi Master",image:"img/food-tiramisu.jpg"}
+        ]));
+        orders = JSON.parse(localStorage.getItem("yo") || "[]");
+        users = JSON.parse(localStorage.getItem("yu") || JSON.stringify([{email:"admin@yummy.com", password:"admin123", name:"Админ", role:"admin"}]));
+        let s = localStorage.getItem("ycu");
+        cu = s ? JSON.parse(s) : null;
+    }
+
+    function toast(msg) { let el = document.getElementById("toast"); el.innerText = msg; el.classList.add("show"); setTimeout(()=>el.classList.remove("show"), 2200); }
+    function aContent(html) { document.getElementById("adminContent").innerHTML = html; }
+
+    // ORDERS
+    function renderAdminOrders() {
+        aContent(`<h3 style="margin-bottom:16px;">📋 Заказы</h3><table style="width:100%"><thead><tr><th>Дата</th><th>Пользователь</th><th>Сумма</th><th>Статус</th></tr></thead><tbody>${orders.map(o => `<tr><td style="font-size:11px;">${o.date}</td><td>${o.userId}</td><td style="color:#B1474B;font-weight:700;">${o.total} ₽</td><td><select class="form-input" style="padding:5px 10px;font-size:11px;" onchange="updOrd(${o.id},this.value)"><option ${o.status === "оформлен" ? "selected" : ""}>оформлен</option><option ${o.status === "готовится" ? "selected" : ""}>готовится</option><option ${o.status === "доставлен" ? "selected" : ""}>доставлен</option><option ${o.status === "отменён" ? "selected" : ""}>отменён</option></select></td></tr>`).join("")}</tbody></table>`);
+    }
+    window.updOrd = (id, st) => { let o = orders.find(o => o.id === id); if (o) o.status = st; saveAll(); };
+
+    // USERS
+    function renderAdminUsers() {
+        aContent(`<h3 style="margin-bottom:16px;">👥 Пользователи</h3><table style="width:100%"><thead><tr><th>Email</th><th>Имя</th><th>Роль</th></tr></thead><tbody>${users.map(u => `<tr><td>${u.email}</td><td>${u.name || "—"}</td><td><span class="badge ${u.role === "admin" ? "badge-ok" : "badge-def"}">${u.role || "client"}</span></td></tr>`).join("")}</tbody></table>`);
+    }
+
+    // RESTAURANTS
+    function openAddRestModal() { document.getElementById("addRestModal").classList.add("active"); }
+    function closeAddRestModal() { document.getElementById("addRestModal").classList.remove("active"); document.getElementById("newRestName").value = ""; document.getElementById("newRestDesc").value = ""; document.getElementById("newRestImage").value = ""; }
+    window.closeAddRestModal = closeAddRestModal;
+
+    function renderAdminRests() {
+        aContent(`<h3 style="margin-bottom:16px;">🏪 Рестораны</h3><button id="newRestBtn" class="btn btn-primary" style="margin-bottom:18px;">+ Добавить ресторан</button><div class="rest-grid">${restaurants.map(r => `<div class="rest-card"><img class="rest-img" src="${r.image}" alt="${r.name}" onerror="this.src='img/rest-default.jpg'"><div class="rest-body"><div class="rest-name">${r.name}</div><div class="rest-desc">${r.description}</div><button class="btn btn-outline" style="margin-top:10px;padding:6px 14px;font-size:11px;" onclick="delRest(${r.id})">🗑 Удалить</button></div></div>`).join("")}</div>`);
+        document.getElementById("newRestBtn")?.addEventListener("click", openAddRestModal);
+        document.getElementById("saveRestBtn")?.addEventListener("click", () => {
+            let name = document.getElementById("newRestName").value.trim();
+            let desc = document.getElementById("newRestDesc").value.trim();
+            let img = document.getElementById("newRestImage").value.trim();
+            if (!name) { toast("Введите название"); return; }
+            let newId = Date.now();
+            let newRest = { id: newId, name: name, description: desc || "", image: img || `https://placehold.co/400x155/EDD5AE/B1474B?text=${encodeURIComponent(name)}` };
+            restaurants.push(newRest);
+            saveAll();
+            closeAddRestModal();
+            renderAdminRests();
+            toast(`Ресторан "${name}" добавлен!`);
+        });
+    }
+    window.delRest = (id) => { foods = foods.filter(f => f.restaurantId !== id); restaurants = restaurants.filter(r => r.id !== id); saveAll(); renderAdminRests(); };
+
+    // FOODS
+    function openAddFoodModal() { 
+        let select = document.getElementById("newFoodRest");
+        if (select) select.innerHTML = restaurants.map(r => `<option value="${r.id}">${r.name}</option>`).join("");
+        document.getElementById("addFoodModal").classList.add("active"); 
+    }
+    function closeAddFoodModal() { 
+        document.getElementById("addFoodModal").classList.remove("active"); 
+        document.getElementById("newFoodName").value = ""; 
+        document.getElementById("newFoodPrice").value = ""; 
+        document.getElementById("newFoodImage").value = ""; 
+    }
+    window.closeAddFoodModal = closeAddFoodModal;
+
+    function renderAdminFoods() {
+        aContent(`<h3 style="margin-bottom:16px;">🍜 Блюда</h3><button id="newFoodBtn" class="btn btn-primary" style="margin-bottom:18px;">+ Добавить блюдо</button><table style="width:100%"><thead><tr><th>Название</th><th>Категория</th><th>Ресторан</th><th>Цена</th><th></th></tr></thead><tbody>${foods.map(f => `<tr><td>${f.name}</td><td>${f.category}</td><td>${f.restaurantName}</td><td style="color:#B1474B;font-weight:700;">${f.price} ₽</td><td style="display:flex;gap:6px;"><button class="btn btn-outline" style="padding:5px 12px;font-size:11px;" onclick="editFoodPrice(${f.id})">✏ Цена</button><button class="btn btn-outline" style="padding:5px 12px;font-size:11px;" onclick="delFood(${f.id})">🗑</button></td></tr>`).join("")}</tbody></table>`);
+        document.getElementById("newFoodBtn")?.addEventListener("click", openAddFoodModal);
+        document.getElementById("saveFoodBtn")?.addEventListener("click", () => {
+            let name = document.getElementById("newFoodName").value.trim();
+            let cat = document.getElementById("newFoodCat").value;
+            let price = parseInt(document.getElementById("newFoodPrice").value);
+            let restId = parseInt(document.getElementById("newFoodRest").value);
+            let img = document.getElementById("newFoodImage").value.trim();
+            let rest = restaurants.find(r => r.id === restId);
+            if (!name || isNaN(price) || !rest) { toast("Заполните все поля"); return; }
+            let newId = Date.now();
+            let catMap = {"Суши":"img/food-sushi.jpg","Роллы":"img/food-rolls.jpg","Рамен":"img/food-ramen.jpg","Поке":"img/food-poke.jpg","Десерты":"img/food-desserts.jpg","Напитки":"img/food-drinks.jpg"};
+            let newFood = { id: newId, name: name, category: cat, price: price, restaurantId: restId, restaurantName: rest.name, image: img || catMap[cat] || "img/food-default.jpg" };
+            foods.push(newFood);
+            saveAll();
+            closeAddFoodModal();
+            renderAdminFoods();
+            toast(`Блюдо "${name}" добавлено!`);
+        });
+    }
+    window.delFood = (id) => { foods = foods.filter(f => f.id !== id); saveAll(); renderAdminFoods(); };
+    window.editFoodPrice = (id) => { let f = foods.find(f => f.id === id); let p = prompt("Новая цена", f.price); if (p && !isNaN(p)) { f.price = parseInt(p); saveAll(); renderAdminFoods(); } };
+
+    // STATS
+    function renderAdminStats() {
+        let rev = orders.reduce((s, o) => s + o.total, 0);
+        let cats = {}; foods.forEach(f => cats[f.category] = (cats[f.category] || 0) + 1);
+        aContent(`<h3 style="margin-bottom:16px;">📊 Статистика</h3><div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px;"><div style="background:#0A0610;border-radius:18px;padding:18px;text-align:center;border:1px solid rgba(255,240,221,0.08);"><div style="font-size:34px;font-weight:700;color:#B1474B;">${orders.length}</div><div style="color:rgba(255,240,221,0.6);">Заказов</div></div><div style="background:#0A0610;border-radius:18px;padding:18px;text-align:center;border:1px solid rgba(255,240,221,0.08);"><div style="font-size:34px;font-weight:700;color:#B1474B;">${rev} ₽</div><div style="color:rgba(255,240,221,0.6);">Выручка</div></div><div style="background:#0A0610;border-radius:18px;padding:18px;text-align:center;border:1px solid rgba(255,240,221,0.08);"><div style="font-size:34px;font-weight:700;color:#B1474B;">${users.filter(u => u.role !== "admin").length}</div><div style="color:rgba(255,240,221,0.6);">Клиентов</div></div></div><h4 style="margin-bottom:12px;color:#FFF0DD;">Блюда по категориям</h4>${Object.entries(cats).map(([c, n]) => `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px;"><span style="min-width:90px;color:rgba(255,240,221,0.7);">${c}</span><div style="flex:1;background:rgba(255,240,221,0.1);border-radius:4px;height:7px;"><div style="width:${(n / foods.length * 100).toFixed(0)}%;background:#B1474B;height:100%;border-radius:4px;"></div></div><span style="color:#B1474B;font-weight:700;">${n}</span></div>`).join("")}`);
+    }
+
+    function handleAdminTab(tab) {
+        document.querySelectorAll(".admin-item").forEach(el => el.classList.remove("active"));
+        document.querySelector(`[data-tab="${tab}"]`)?.classList.add("active");
+        if (tab === "orders") renderAdminOrders();
+        else if (tab === "users") renderAdminUsers();
+        else if (tab === "restaurants") renderAdminRests();
+        else if (tab === "foods") renderAdminFoods();
+        else renderAdminStats();
+    }
+
+    function showAdminPanel() {
+        if (cu && cu.role === "admin") {
+            document.getElementById("loginPage").classList.remove("active-page");
+            document.getElementById("adminPage").classList.add("active-page");
+            document.getElementById("logoutBtn").style.display = "flex";
+            handleAdminTab("orders");
+        } else { toast("Войдите как администратор"); document.getElementById("loginPage").classList.add("active-page"); document.getElementById("adminPage").classList.remove("active-page"); }
+    }
+
+    function logout() { cu = null; localStorage.removeItem("ycu"); document.getElementById("loginPage").classList.add("active-page"); document.getElementById("adminPage").classList.remove("active-page"); document.getElementById("logoutBtn").style.display = "none"; toast("Вы вышли"); }
+
+    document.getElementById("adminLoginBtn").addEventListener("click", () => {
+        let email = document.getElementById("adminEmail").value, pass = document.getElementById("adminPassword").value;
+        let user = users.find(u => u.email === email && u.password === pass && u.role === "admin");
+        if (user) { cu = user; saveAll(); showAdminPanel(); toast("Добро пожаловать!"); } else { toast("Неверный email или пароль"); }
+    });
+    document.getElementById("logoutBtn").addEventListener("click", logout);
+    document.querySelectorAll(".admin-item").forEach(el => el.addEventListener("click", () => handleAdminTab(el.dataset.tab)));
+
+    let mt = document.getElementById("menuToggle"), nm = document.getElementById("navMenu");
+    if (mt) mt.addEventListener("click", () => nm.classList.toggle("active"));
+
+    loadData();
+    if (cu && cu.role === "admin") showAdminPanel();
+    else document.getElementById("loginPage").classList.add("active-page");
+</script>
+</body>
+</html>
